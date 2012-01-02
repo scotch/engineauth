@@ -1,0 +1,223 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Dependencies &mdash; EngineAuth 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/sidebar.js"></script>
+    <link rel="top" title="EngineAuth 0.1 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="index.html">EngineAuth 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="dependencies">
+<h1>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference external" href="http://code.google.com/p/appengine-ndb-experiment/">ndb</a> - EngineAuth uses features of ndb that are only available in master. This requirement will be removed by after the next sdk update.</li>
+<li><a class="reference external" href="http://code.google.com/p/google-api-python-client/">oauth2client</a> - Required for OAuth2 Strategies</li>
+<li><a class="reference external" href="http://code.google.com/p/google-api-python-client/">httplib2</a> - Required for OAuth and OAuth2 Strategies</li>
+<li><a class="reference external" href="http://code.google.com/p/uri-templates">uri-templates</a> - Required for OAuth and OAuth2 Strategies</li>
+<li><a class="reference external" href="http://code.google.com/p/python-gflags">python-gflags</a> - Required for OAuth and OAuth2 Strategies</li>
+<li><a class="reference external" href="http://github.com/simplegeo/python-oauth2">python-oauth2</a> - Required for OAuth Strategies</li>
+</ul>
+</div>
+<div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>Copy <tt class="docutils literal"><span class="pre">engineauth</span></tt> directory and the contents of <tt class="docutils literal"><span class="pre">lib</span></tt> directory to your project&#8217;s <tt class="docutils literal"><span class="pre">root</span></tt> directory.</p>
+<div class="section" id="configuring-engineauth">
+<h2>Configuring EngineAuth<a class="headerlink" href="#configuring-engineauth" title="Permalink to this headline">¶</a></h2>
+<p>In your <tt class="docutils literal"><span class="pre">appengine_config.py</span></tt> add:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">webapp_add_wsgi_middleware</span><span class="p">(</span><span class="n">app</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">engineauth</span> <span class="kn">import</span> <span class="n">middleware</span>
+    <span class="k">return</span> <span class="n">middleware</span><span class="o">.</span><span class="n">AuthMiddleware</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+
+<span class="n">engineauth</span> <span class="o">=</span> <span class="p">{</span>
+<span class="c">#    &#39;base_url&#39;: &#39;auth&#39;,</span>
+    <span class="s">&#39;secret_key&#39;</span><span class="p">:</span> <span class="s">&#39;CHANGE_TO_A_SECRET_KEY&#39;</span><span class="p">,</span>
+    <span class="s">&#39;session_backend&#39;</span><span class="p">:</span> <span class="s">&#39;datastore&#39;</span><span class="p">,</span>
+    <span class="s">&#39;user_model&#39;</span><span class="p">:</span> <span class="s">&#39;engineauth.models.User&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">engineauth</span><span class="p">[</span><span class="s">&#39;provider.auth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;user_model&#39;</span><span class="p">:</span> <span class="s">&#39;engineauth.models.User&#39;</span><span class="p">,</span>
+    <span class="s">&#39;session_backend&#39;</span><span class="p">:</span> <span class="s">&#39;datastore&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c"># Facebook Authentication</span>
+<span class="n">engineauth</span><span class="p">[</span><span class="s">&#39;provider.facebook&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;client_id&#39;</span><span class="p">:</span> <span class="s">&#39;CHANGE_TO_FACEBOOK_APP_ID&#39;</span><span class="p">,</span>
+    <span class="s">&#39;client_secret&#39;</span><span class="p">:</span> <span class="s">&#39;CHANGE_TO_FACEBOOK_CLIENT_SECRET&#39;</span><span class="p">,</span>
+    <span class="s">&#39;scope&#39;</span><span class="p">:</span> <span class="s">&#39;email&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c"># Google Plus Authentication</span>
+<span class="n">engineauth</span><span class="p">[</span><span class="s">&#39;provider.google&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;client_id&#39;</span><span class="p">:</span> <span class="s">&#39;CHANGE_TO_GOOGLE_CLIENT_ID&#39;</span><span class="p">,</span>
+    <span class="s">&#39;client_secret&#39;</span><span class="p">:</span> <span class="s">&#39;CHANGE_TO_GOOGLE_CLIENT_SECRET&#39;</span><span class="p">,</span>
+    <span class="s">&#39;api_key&#39;</span><span class="p">:</span> <span class="s">&#39;CHANGE_TO_GOOGLE_API_KEY&#39;</span><span class="p">,</span>
+    <span class="s">&#39;scope&#39;</span><span class="p">:</span> <span class="s">&#39;https://www.googleapis.com/auth/plus.me&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c"># Twitter Authentication</span>
+<span class="n">engineauth</span><span class="p">[</span><span class="s">&#39;provider.twitter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;client_id&#39;</span><span class="p">:</span> <span class="s">&#39;l8nfb1saEW4mlTOARqunKg&#39;</span><span class="p">,</span>
+    <span class="s">&#39;client_secret&#39;</span><span class="p">:</span> <span class="s">&#39;LCQweRuuGndhtNWihnwiDxs9npkNRII8GAgpGkYFi5c&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="acquiring-client-keys">
+<h2>Acquiring Client Keys<a class="headerlink" href="#acquiring-client-keys" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="facebook">
+<h3>Facebook<a class="headerlink" href="#facebook" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>Go to: <a class="reference external" href="https://developers.facebook.com/apps">https://developers.facebook.com/apps</a></li>
+<li>Select your application</li>
+</ol>
+<p>3. Under <tt class="docutils literal"><span class="pre">Select</span> <span class="pre">how</span> <span class="pre">your</span> <span class="pre">app</span> <span class="pre">integrates</span> <span class="pre">with</span> <span class="pre">Facebook</span></tt> click <tt class="docutils literal"><span class="pre">Website</span></tt>. In the <tt class="docutils literal"><span class="pre">Site</span> <span class="pre">URL:</span></tt> field enter your domain E.g. <a class="reference external" href="http://example.com/">http://example.com/</a> or <a class="reference external" href="http://localhost:8080/">http://localhost:8080/</a> be sure to include the closing <tt class="docutils literal"><span class="pre">/</span></tt>.
+3. Copy <tt class="docutils literal"><span class="pre">App</span> <span class="pre">ID/API</span> <span class="pre">Key</span></tt> as <tt class="docutils literal"><span class="pre">client_id</span></tt>
+4. Copy <tt class="docutils literal"><span class="pre">App</span> <span class="pre">Secret</span></tt> as <tt class="docutils literal"><span class="pre">client_secret</span></tt></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Zuckerberg won&#8217;t allow you to specify multiple callback domains for a single application. So for development you must create a separate application. Then, in your <tt class="docutils literal"><span class="pre">appengine_config.py</span></tt> you can then specify which config will be loaded at runtime.</p>
+</div>
+<p>E.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">os</span>
+<span class="n">ON_DEV</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;SERVER_SOFTWARE&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;Dev&#39;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">ON_DEV</span><span class="p">:</span>
+    <span class="c"># Facebook settings for Development</span>
+    <span class="n">engineauth</span><span class="p">[</span><span class="s">&#39;provider.facebook&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;client_id&#39;</span><span class="p">:</span> <span class="s">&#39;DEVELOPMENT_APP_KEY&#39;</span><span class="p">,</span>
+        <span class="s">&#39;client_secret&#39;</span><span class="p">:</span> <span class="s">&#39;DEVELOPMENT_APP_SECRET&#39;</span><span class="p">,</span>
+        <span class="s">&#39;scope&#39;</span><span class="p">:</span> <span class="s">&#39;email&#39;</span><span class="p">,</span>
+        <span class="p">}</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="c"># Facebook settings for Production</span>
+    <span class="n">engineauth</span><span class="p">[</span><span class="s">&#39;provider.facebook&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;client_id&#39;</span><span class="p">:</span> <span class="s">&#39;PRODUCTION_APP_KEY&#39;</span><span class="p">,</span>
+        <span class="s">&#39;client_secret&#39;</span><span class="p">:</span> <span class="s">&#39;PRODUCTION_APP_SECRET&#39;</span><span class="p">,</span>
+        <span class="s">&#39;scope&#39;</span><span class="p">:</span> <span class="s">&#39;email&#39;</span><span class="p">,</span>
+        <span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="google-plus">
+<h3>Google Plus<a class="headerlink" href="#google-plus" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>Go to: <a class="reference external" href="https://code.google.com/apis/console">https://code.google.com/apis/console</a></li>
+<li>Select your application or create a new one.</li>
+<li>Choose <tt class="docutils literal"><span class="pre">API</span> <span class="pre">Access</span></tt></li>
+<li>If you have not generated a client id, do so.</li>
+</ol>
+</div>
+<div class="section" id="twitter">
+<h3>Twitter<a class="headerlink" href="#twitter" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>Go to: <a class="reference external" href="https://dev.twitter.com/apps">https://dev.twitter.com/apps</a></li>
+<li>Select your application or create a new one.</li>
+<li>Make sure the you set the callback to YOUR_APPLICATION_URL/auth/twitter/callback. It&#8217;s fine to set this to your production url, EngineAuth passes a redirect url while authenticating so there&#8217;s no need to specify the localhost:8080 here.</li>
+<li>Go to Details OAuth settings</li>
+<li>Copy <tt class="docutils literal"><span class="pre">Consumer</span> <span class="pre">key</span></tt> as <tt class="docutils literal"><span class="pre">client_id</span></tt></li>
+<li>Copy <tt class="docutils literal"><span class="pre">Consumer</span> <span class="pre">secret</span></tt> as <tt class="docutils literal"><span class="pre">client_secret</span></tt></li>
+</ol>
+</div>
+<div class="section" id="app-engine-openid">
+<h3>App Engine OpenID<a class="headerlink" href="#app-engine-openid" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>Go to: <a class="reference external" href="https://appengine.google.com">https://appengine.google.com</a></li>
+<li>Select your application</li>
+<li>Choose <tt class="docutils literal"><span class="pre">Application</span> <span class="pre">Settings</span></tt></li>
+<li>Choose <tt class="docutils literal"><span class="pre">(Experimental</span> <span class="pre">Federated</span> <span class="pre">Login)</span></tt> from the <tt class="docutils literal"><span class="pre">Authentication</span> <span class="pre">Options</span></tt> drop down</li>
+<li>Click Save</li>
+</ol>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Dependencies</a></li>
+<li><a class="reference internal" href="#installation">Installation</a><ul>
+<li><a class="reference internal" href="#configuring-engineauth">Configuring EngineAuth</a></li>
+<li><a class="reference internal" href="#acquiring-client-keys">Acquiring Client Keys</a><ul>
+<li><a class="reference internal" href="#facebook">Facebook</a></li>
+<li><a class="reference internal" href="#google-plus">Google Plus</a></li>
+<li><a class="reference internal" href="#twitter">Twitter</a></li>
+<li><a class="reference internal" href="#app-engine-openid">App Engine OpenID</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="index.html">EngineAuth 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Kyle Finley.
+    </div>
+  </body>
+</html>
