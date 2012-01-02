@@ -1,3 +1,0 @@
-# Strategies
-
-### Google Plus ###
