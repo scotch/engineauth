@@ -1,0 +1,95 @@
+from __future__ import absolute_import
+import urllib
+from apiclient.oauth import FlowThreeLegged
+from engineauth import models
+from engineauth.strategies.base import BaseStrategy
+import httplib2
+import cPickle as pickle
+
+
+__author__ = 'kyle.finley@gmail.com (Kyle Finley)'
+
+
+
+
+
+def _abstract():
+    raise NotImplementedError('You need to override this function')
+
+class OAuthStrategy(BaseStrategy):
+
+    def http(self, req):
+        """Returns an authorized http instance.
+        """
+        if req.credentials is not None and not req.credentials.invalid:
+            return req.credentials.authorize(httplib2.Http())
+
+    def service(self, **kwargs):
+        return _abstract()
+
+    def get_or_create_user_profile(self, auth_id, user_info,
+                                   email=None, **kwargs):
+        user = models.User.get_or_create(auth_id, email)
+        profile = models.Profile.get_or_create(auth_id, user_info,
+            credentials=kwargs.get('credentials'))
+        return user, profile
+
+    def start(self, req):
+        authorize_url = req.flow.step1_get_authorize_url(
+            oauth_callback=self.callback_uri)
+        req.session.data[self.session_key] = pickle.dumps(req.flow)
+        return authorize_url
+
+    def callback(self, req):
+        flow = pickle.loads(req.session.data.get(self.session_key))
+        if flow is None:
+            raise Exception('Pickle error')
+        req.credentials = flow.step2_exchange(req.params)
+        user_info = self.user_info(req)
+        try:
+            user, profile = self.get_or_create_user_profile(
+                auth_id=user_info['auth_id'],
+                user_info=user_info,
+                email=user_info.get('info').get('email'),
+                credentials=req.credentials)
+            self.add_user_to_session(req, user.get_id())
+            return self.get_redirect_uri(req)
+        except Exception, e:
+            # TODO: Handle error
+            raise e
+
+    def handle_request(self, req):
+        self.callback_uri = '{0}{1}/{2}/callback'.format(req.host_url,
+            req.config['base_uri'], req.provider)
+        self.session_key = '_auth_strategy:{0}'.format(req.provider)
+
+        discovery = {
+            'request': {
+                'url': self.options['request_token_uri'],
+                'parameters': {
+                },
+            },
+            'authorize': {
+                'url': self.options['authorize_uri'],
+                'parameters': {
+                    'oauth_token': {
+                        'required': True,
+                    },
+                },
+            },
+            'access': {
+                'url': self.options['access_token_uri'],
+                'parameters': {
+                },
+            },
+        }
+        req.flow = FlowThreeLegged(
+            discovery=discovery,
+            consumer_key=req.provider_config.get('client_id'),
+            consumer_secret=req.provider_config.get('client_secret'),
+            user_agent='engine_auth'
+        )
+        if not req.provider_params:
+            return self.start(req)
+        else:
+            return self.callback(req)

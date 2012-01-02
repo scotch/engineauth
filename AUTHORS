@@ -1,0 +1,38 @@
+EngineAuth is maintained by Kyle Finley <kyle.finley@gmail.com>.
+
+Contributors:
+
+
+EngineAuth includes code or ideas ported or adapted from the following projects:
+
+- `webapp2 <http://code.google.com/p/webapp-improved/>`_:
+  - Copyright (c) 2010 Rodrigo Moraes.
+  - Apache 2.0 License.
+
+- `Google APIs Client Library for Python <http://code.google.com/p/google-api-python-client/>`_:
+  - Copyright (c) 2010 Google Inc.
+  - Apache 2.0 License.
+
+- `OmniAuth <https://github.com/intridea/omniauth>`_:
+  - Copyright (c) 2010-2011 Michael Bleigh and Intridea, Inc.
+  - MIT License.
+
+- `Google App Engine SDK <http://code.google.com/appengine/>`_:
+  - Copyright (c) 2008 Google Inc.
+  - Apache 2.0 License.
+
+- `WebOb <http://pythonpaste.org/webob/>`_:
+  - Copyright (c) 2007 Ian Bicking and Contributors.
+  - MIT License.
+
+- `Werkzeug <http://werkzeug.pocoo.org/>`_:
+  - Copyright (c) 2011 Werkzeug Team.
+  - BSD License.
+
+- `Tornado <http://www.tornadoweb.org/>`_:
+  - Copyright (c) 2009 Facebook.
+  - Apache 2.0 License.
+
+- `Flask <http://flask.pocoo.org/>`_:
+  - Copyright (c) 2010 Armin Ronacher and Contributors.
+  - BSD License.
