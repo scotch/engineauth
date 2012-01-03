@@ -61,8 +61,8 @@ Facebook
 1. Go to: https://developers.facebook.com/apps
 2. Select your application
 3. Under ``Select how your app integrates with Facebook`` click ``Website``. In the ``Site URL:`` field enter your domain E.g. http://example.com/ or http://localhost:8080/ be sure to include the closing ``/``.
-3. Copy ``App ID/API Key`` as ``client_id``
-4. Copy ``App Secret`` as ``client_secret``
+4. Copy ``App ID/API Key`` as ``client_id``
+5. Copy ``App Secret`` as ``client_secret``
 
 .. Note::
     Zuckerberg won't allow you to specify multiple callback domains for a single application. So for development you must create a separate application. Then, in your ``appengine_config.py`` you can then specify which config will be loaded at runtime.
@@ -91,7 +91,16 @@ Google Plus
 1. Go to: https://code.google.com/apis/console
 2. Select your application or create a new one.
 3. Choose ``API Access``
-4. If you have not generated a client id, do so.
+4. Click ``Create an OAuth 2.0 client ID..``
+5. Enter Product name -> Next
+6. Select ``Web application``
+7. Under ``Your site or host`` select ``(more options)``
+8. Under ``Authorized Redirect URIs`` add your domain name followed by ``/auth/google/callback`` E.g.::
+    http://localhost:8080/auth/google/callback
+    http://YOUR_DOMAIN.COM/auth/google/callback
+9. Click ``Create client ID``
+10. Copy ``Client ID`` as ``client_id``
+11. Copy ``Client secret`` as ``client_secret``
 
 Twitter
 -------
