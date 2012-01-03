@@ -1,0 +1,25 @@
+*.py[co]
+
+# When this repository is included as a
+# submodule within a buildout project,
+# buildout will dump a .egg-info directory
+# into this directory causing the submodule
+# to become "dirty", and this shows up
+# as a change to track in the parent repository.
+# Therefore, we ignore *.egg-info at the
+# repository level.
+*.egg-info
+
+
+# OSX
+.DS_Store
+
+# PyCharm
+.idea
+
+Makefile
+make.bat
+conf.py
+_templates
+_static
+_build
