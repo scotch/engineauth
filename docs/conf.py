@@ -14,7 +14,7 @@
 import os
 import sys
 
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+on_rtd = os.environ.get('READTHEDOCS') == 'True'
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -81,7 +81,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'EngineAuth'
+#project = u'EngineAuth'
+project = str(os.environ)
 copyright = u'2012, Kyle Finley'
 
 # The version info for the project you're documenting, acts as replacement for
