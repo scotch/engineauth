@@ -14,7 +14,7 @@
 import os
 import sys
 
-on_rtd = os.environ.get('READTHEDOCS') == 'True'
+on_rtd = os.environ.get('READTHEDOCS', None)
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -81,8 +81,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-#project = u'EngineAuth'
-project = str(os.environ)
+project = u'EngineAuth'
 copyright = u'2012, Kyle Finley'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -140,7 +139,7 @@ if on_rtd:
 else:
     # The theme to use for HTML and HTML Help pages.  See the documentation for
     # a list of builtin themes.
-    html_theme = 'default'
+    html_theme = 'sphinx-bootstrap'
 
     # Theme options are theme-specific and customize the look and feel of a theme
     # further.  For a list of options available for each theme, see the
