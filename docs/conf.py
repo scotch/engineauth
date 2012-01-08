@@ -23,7 +23,7 @@ gae_path = '/usr/local/google_appengine'
 
 current_path = os.path.abspath(os.path.dirname(__file__))
 path = os.path.join(current_path, '..')
-theme_path = os.path.join(current_path, '_themes', 'webapp2')
+theme_path = os.path.join(current_path, '_themes', 'sphinx-bootstrap')
 
 sys.path[0:0] = [
     theme_path,
