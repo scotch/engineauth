@@ -1,5 +1,9 @@
-Dependencies
+Installation
 ============
+Copy the ``engineauth`` directory and the contents of ``lib`` directory to your project's ``root`` directory.
+
+Dependencies
+------------
 - `ndb <http://code.google.com/p/appengine-ndb-experiment/>`_ - EngineAuth uses features of ndb that are only available in master. This requirement will be removed by after the next sdk update.
 - `oauth2client <http://code.google.com/p/google-api-python-client/>`_ - Required for OAuth2 Strategies
 - `httplib2 <http://code.google.com/p/google-api-python-client/>`_ - Required for OAuth and OAuth2 Strategies
@@ -7,12 +11,8 @@ Dependencies
 - `python-gflags <http://code.google.com/p/python-gflags>`_ - Required for OAuth and OAuth2 Strategies
 - `python-oauth2 <http://github.com/simplegeo/python-oauth2>`_ - Required for OAuth Strategies
 
-Installation
-============
-Copy ``engineauth`` directory and the contents of ``lib`` directory to your project's ``root`` directory.
-
 Configuring EngineAuth
-**********************
+----------------------
 
 In your ``appengine_config.py`` add::
 
@@ -21,9 +21,7 @@ In your ``appengine_config.py`` add::
         return middleware.AuthMiddleware(app)
 
     engineauth = {
-    #    'base_url': 'auth',
         'secret_key': 'CHANGE_TO_A_SECRET_KEY',
-        'session_backend': 'datastore',
         'user_model': 'engineauth.models.User',
     }
 
@@ -54,10 +52,10 @@ In your ``appengine_config.py`` add::
     }
 
 Acquiring Client Keys
-*********************
+~~~~~~~~~~~~~~~~~~~~~
 
 Facebook
---------
+********
 1. Go to: https://developers.facebook.com/apps
 2. Select your application
 3. Under ``Select how your app integrates with Facebook`` click ``Website``. In the ``Site URL:`` field enter your domain E.g. http://example.com/ or http://localhost:8080/ be sure to include the closing ``/``.
@@ -65,7 +63,7 @@ Facebook
 5. Copy ``App Secret`` as ``client_secret``
 
 .. Note::
-    Zuckerberg won't allow you to specify multiple callback domains for a single application. So for development you must create a separate application. Then, in your ``appengine_config.py`` you can then specify which config will be loaded at runtime.
+    Zuckerberg won't allow you to specify multiple callback domains for a single application. So for development you must create a separate application. Then, in your ``appengine_config.py`` you can specify which config will be loaded at runtime.
 
 E.g.::
 
@@ -86,8 +84,9 @@ E.g.::
             'scope': 'email',
             }
 
+
 Google Plus
------------
+***********
 1. Go to: https://code.google.com/apis/console
 2. Select your application or create a new one.
 3. Choose ``API Access``
@@ -95,25 +94,23 @@ Google Plus
 5. Enter Product name -> Next
 6. Select ``Web application``
 7. Under ``Your site or host`` select ``(more options)``
-8. Under ``Authorized Redirect URIs`` add your domain name followed by ``/auth/google/callback`` E.g.::
-    http://localhost:8080/auth/google/callback
-    http://YOUR_DOMAIN.COM/auth/google/callback
+8. Under ``Authorized Redirect URIs`` add your domain name followed by ``/auth/google/callback`` E.g. ``http://localhost:8080/auth/google/callback``, ``http://YOUR_DOMAIN.COM/auth/google/callback``
 9. Click ``Create client ID``
 10. Copy ``Client ID`` as ``client_id``
 11. Copy ``Client secret`` as ``client_secret``
 
 Twitter
--------
+*******
 1. Go to: https://dev.twitter.com/apps
 2. Select your application or create a new one.
-3. Make sure the you set the callback to YOUR_APPLICATION_URL/auth/twitter/callback. It's fine to set this to your production url, EngineAuth passes a redirect url while authenticating so there's no need to specify the localhost:8080 here.
+3. Make sure the you set the callback to ``http://YOUR_DOMAIN.COM/auth/twitter/callback``. It's fine to set this to your production url, EngineAuth passes a redirect url while authenticating so there's no need to specify ``localhost:8080`` here.
 4. Go to Details OAuth settings
 5. Copy ``Consumer key`` as ``client_id``
 6. Copy ``Consumer secret`` as ``client_secret``
 
 
 App Engine OpenID
------------------
+*****************
 1. Go to: https://appengine.google.com
 2. Select your application
 3. Choose ``Application Settings``

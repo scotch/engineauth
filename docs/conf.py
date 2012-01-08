@@ -11,7 +11,47 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import os
+import sys
+
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+
+# If extensions (or modules to document with autodoc) are in another directory,
+# add these directories to sys.path here. If the directory is relative to the
+# documentation root, use os.path.abspath to make it absolute, like shown here.
+gae_path = '/usr/local/google_appengine'
+
+current_path = os.path.abspath(os.path.dirname(__file__))
+path = os.path.join(current_path, '..')
+theme_path = os.path.join(current_path, '_themes', 'webapp2')
+
+sys.path[0:0] = [
+    theme_path,
+    gae_path,
+    # All libs used by webapp2 and extras.
+    os.path.join(path, 'lib', ''),
+#    os.path.join(path, 'lib', 'babel'),
+#    os.path.join(path, 'lib', 'Jinja2-2.6'),
+#    os.path.join(path, 'lib', 'Mako-0.4.1'),
+#    os.path.join(path, 'lib', 'gaepytz-2011h'),
+#    os.path.join(path, 'lib', 'WebOb-1.0.8'),
+    os.path.join(gae_path, 'lib', 'webapp2'),
+
+    # SDK libs.
+    os.path.join(gae_path, 'lib', 'django_0_96'),
+    #os.path.join(gae_path, 'lib', 'webob'),
+    os.path.join(gae_path, 'lib', 'yaml', 'lib'),
+    os.path.join(gae_path, 'lib', 'protorpc'),
+    os.path.join(gae_path, 'lib', 'simplejson'),
+    path,
+    ]
+
+try:
+    from google.appengine.dist import use_library
+    use_library('django', '1.2')
+except ImportError:
+    pass
+
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -25,7 +65,8 @@ import sys, os
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = []
+#extensions = []
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'sphinx.ext.todo', 'sphinx.ext.coverage', 'sphinx.ext.ifconfig', 'sphinx.ext.viewcode']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -91,27 +132,37 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+#html_theme = 'default'
 
-# Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
-# documentation.
-html_theme_options = {
-    'collapsiblesidebar': True,
-#    'rightsidebar': True,
-#    'footerbgcolor': 'red',
-#    'nosidebar': True,
-}
+if on_rtd:
+    html_theme = 'default'
+else:
+    # The theme to use for HTML and HTML Help pages.  See the documentation for
+    # a list of builtin themes.
+    html_theme = 'sphinx-bootstrap'
+
+    # Theme options are theme-specific and customize the look and feel of a theme
+    # further.  For a list of options available for each theme, see the
+    # documentation.
+    html_theme_options = {
+        'analytics_code': 'UA-28149225-1',
+        'analytics_domain': 'scotchmedia.com',
+        'github_user': 'scotch',
+        'github_repo': 'engineauth',
+        'twitter_username': 'scotchmedia',
+        'home_url': 'http://code.scotchmedia.com/engineauth',
+        'disqus_shortname': 'scotchmedia',
+    }
 
 # Add any paths that contain custom themes here, relative to this directory.
-#html_theme_path = []
+html_theme_path = ['_themes']
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
 #html_title = None
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
-#html_short_title = None
+html_short_title = 'engineauth'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
@@ -155,7 +206,7 @@ html_use_smartypants = True
 html_show_sourcelink = False
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
-html_show_sphinx = False
+html_show_sphinx = True
 
 # If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
 #html_show_copyright = True
