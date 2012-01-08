@@ -139,20 +139,20 @@ if on_rtd:
 else:
     # The theme to use for HTML and HTML Help pages.  See the documentation for
     # a list of builtin themes.
-    html_theme = 'sphinx-bootstrap'
+    html_theme = 'default'
 
     # Theme options are theme-specific and customize the look and feel of a theme
     # further.  For a list of options available for each theme, see the
     # documentation.
-    html_theme_options = {
-        'analytics_code': 'UA-28149225-1',
-        'analytics_domain': 'scotchmedia.com',
-        'github_user': 'scotch',
-        'github_repo': 'engineauth',
-        'twitter_username': 'scotchmedia',
-        'home_url': 'http://code.scotchmedia.com/engineauth',
-        'disqus_shortname': 'scotchmedia',
-    }
+#    html_theme_options = {
+#        'analytics_code': 'UA-28149225-1',
+#        'analytics_domain': 'scotchmedia.com',
+#        'github_user': 'scotch',
+#        'github_repo': 'engineauth',
+#        'twitter_username': 'scotchmedia',
+#        'home_url': 'http://code.scotchmedia.com/engineauth',
+#        'disqus_shortname': 'scotchmedia',
+#    }
 
 # Add any paths that contain custom themes here, relative to this directory.
 html_theme_path = ['_themes']
