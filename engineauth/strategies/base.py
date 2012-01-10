@@ -1,7 +1,16 @@
 import threading
 from webob import Request
 import webob
+from engineauth import models
+from engineauth.middleware import EngineAuthRequest
 
+
+class Error(Exception):
+    """Base user exception."""
+
+class EngineAuthError(Error):
+    def __init__(self, msg):
+        self.message = msg
 
 def _abstract():
     raise NotImplementedError('You need to override this function')
@@ -9,24 +18,34 @@ def _abstract():
 
 class BaseStrategy(object):
 
+    error_class = EngineAuthError
+
     def __init__(self, app, config=None):
         self.app = app
+        self.config = config
 
     def __call__(self, environ, start_response):
-        req = Request(environ)
-        req.provider_config = req.config['provider.{0}'.format(req.provider)]
-        self.set_redirect(req)
+        req = EngineAuthRequest(environ)
+        req.provider_config = self.config['provider.{0}'.format(req.provider)]
+        # TODO: This area needs to be reworked. There needs to be
+        # a better way to handle errors
         try:
             redirect_uri = self.handle_request(req)
         except Exception, e:
-            redirect_uri = req.config['login_uri']
+            req.add_message(e.message, level='error')
+            redirect_uri = self.config['login_uri']
         resp = webob.exc.HTTPTemporaryRedirect(location=redirect_uri)
+
         resp.request = req
         return resp(environ, start_response)
 
     @property
     def options(self):
-        return None
+        """
+        Strategy Options must be overridden by sub-class
+        :return:
+        """
+        return _abstract()
 
     def user_info(self, req):
         """
@@ -124,24 +143,11 @@ class BaseStrategy(object):
         """
         _abstract()
 
-    def get_or_create_user_profile(self, auth_id, user_info,
-                                   email=None, **kwargs):
-        _abstract()
+    def get_or_create_profile(self, auth_id, user_info, **kwargs):
+        return models.UserProfile.get_or_create(auth_id, user_info, **kwargs)
 
     def handle_request(self, req):
         _abstract()
 
-    def add_user_to_session(self, req, user_id):
-        req.session.user_id = user_id
-        return req
-
-    def set_redirect(self, req):
-        next_uri = req.GET.get('next')
-        if next_uri is not None:
-            req.session.data['_redirect_uri'] = next_uri
-
-    def get_redirect_uri(self, req):
-        try:
-            return str(req.session.data.pop('_redirect_uri'))
-        except KeyError:
-            return req.config['default_redirect_uri']
+    def raise_error(self, message):
+        raise EngineAuthError(msg=message)

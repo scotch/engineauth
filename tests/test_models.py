@@ -21,24 +21,22 @@ class User(model.Model):
 class TestProfile(test_base.BaseTestCase):
     def setUp(self):
         super(TestProfile, self).setUp()
-        self.register_model('Profile', models.Profile)
+        self.register_model('UserProfile', models.UserProfile)
 
     def test_create(self):
         uid = 'test@example.com'
         password = 'password1'
         auth_id = models.User.generate_auth_id('password', uid)
-        p = models.Profile.create(auth_id, user_info=None, password=password)
+        p = models.UserProfile.get_or_create(auth_id, user_info=None, password=password)
         self.assertEqual(p.password, password)
         # retrieve
-        p2 = models.Profile.get_by_id(auth_id)
+        p2 = models.UserProfile.get_by_id(auth_id)
         self.assertEqual(p, p2)
 
 class TestUser(test_base.BaseTestCase):
     def setUp(self):
         super(TestUser, self).setUp()
         self.register_model('User', models.User)
-        self.register_model('UserToken', models.UserToken)
-        self.register_model('Unique', models.Unique)
 
     def test_generate_auth_id(self):
         m = models.User
@@ -47,27 +45,9 @@ class TestUser(test_base.BaseTestCase):
         auth_id = m.generate_auth_id('appengine_openid', 'auth_id_2', 'google')
         self.assertEqual(auth_id, 'appengine_openid#google:auth_id_2')
 
-    def test_get(self):
-        m = models.User
-        user = m.create_user(auth_id='auth_id_1', password_raw='foo')
-        self.assertTrue(user is not None)
-
-        # user.key.id() is required to retrieve the auth token
-        user_id = user.key.id()
-
-        token = m.create_token(user_id)
-
-        self.assertEqual(m.get_by_auth_id('auth_id_1'), user)
-        self.assertEqual(m.get_by_auth_id('auth_id_2'), None)
-
-        u, ts = m.get_by_auth_token(user_id, token)
-        self.assertEqual(u, user)
-        u, ts = m.get_by_auth_token('fake_user_id', token)
-        self.assertEqual(u, None)
-
     def test_create(self):
         m = models.User
-        user = m.create_user(auth_id='auth_id_1', password_raw='foo')
+        user = m.create_user(auth_ids='auth_id_1')
         self.assertTrue(user is not None)
 
         # duplicate auth_id
@@ -84,83 +64,187 @@ class TestUser(test_base.BaseTestCase):
         extras = ['foo', 'bar', 'baz']
         values = dict((v, v + '_value') for v in extras)
         values['ding'] = 'ding_value'
-        user = m.create_user(auth_id='auth_id_2', **values)
+        user = m.create_user(auth_ids='auth_id_2', **values)
         self.assertTrue(user is not None)
         for prop in extras:
             self.assertEqual(getattr(user, prop), prop + '_value')
         self.assertEqual(user.ding, 'ding_value')
 
+    def test_get(self):
+        m = models.User
+        user = m.create_user(auth_ids='auth_id_1')
+        self.assertTrue(user is not None)
+        self.assertEqual(m.get_by_auth_id('auth_id_1'), user)
+        self.assertEqual(m.get_by_auth_id('auth_id_2'), None)
+
     def test_add_auth_ids(self):
         m = models.User
-        user = m.create_user(auth_id='auth_id_1', password_raw='foo')
-        user.add_auth_id('auth_id_2')
+        user = m.create_user(auth_ids='auth_id_1')
+        user._add_auth_id('auth_id_2')
         self.assertEqual(user.auth_ids, ['auth_id_1', 'auth_id_2'])
         self.assertTrue(len(user.auth_ids), 2)
 
         # Adding it again should have no effect
-        user.add_auth_id('auth_id_2')
+        user._add_auth_id('auth_id_2')
         self.assertTrue(len(user.auth_ids), 2)
 
         # Duplicate: New user trying to add an existing users auth_id
-        user2 = m.create_user(auth_id='auth_id_3', password_raw='foo')
+        user2 = m.create_user(auth_ids='auth_id_3', password_raw='foo')
         self.assertRaises(models.DuplicatePropertyError,
-            user2.add_auth_id, 'auth_id_2')
+            user2._add_auth_id, 'auth_id_2')
         error = None
         try:
-            user2.add_auth_id('auth_id_2')
+            user2._add_auth_id('auth_id_2')
         except models.DuplicatePropertyError, e:
             error = e
         self.assertEquals(error.values, ['auth_id'])
 
+    def test_get_emails(self):
+        m = models.User
+        email = 'example@example.com'
+        user = m.create_user(auth_ids='auth_id_1', password_raw='foo')
+        user.add_email(email)
+        emails = user.get_emails()
+        self.assertEqual(emails[0].value, email)
+
     def test_add_email(self):
         # New User non-used email
         m = models.User
-        email = 'example@example.com'
-        user = m.create_user(auth_id='auth_id_1', password_raw='foo')
-        user.add_email(email)
-        self.assertTrue(user._has_email(email))
-        self.assertTrue(len(user.emails), 1)
+        email1 = 'example@example.com'
+        email_type1 = 'home'
+        email_primary1 = True
+        email_verified1 = True
+        user = m.create_user(auth_ids='auth_id_1', password_raw='foo')
+        user.add_email(email1, primary=email_primary1, type=email_type1,
+            verified=email_verified1)
 
-        # Adding it again should have no effect
-        user.add_email(email)
-        self.assertTrue(user._has_email(email))
-        self.assertTrue(len(user.emails), 1)
+        emails = user.get_emails()
+        self.assertEqual(len(emails), 1)
+        self.assertEqual(emails[0].value, email1)
+        self.assertEqual(emails[0].type, email_type1)
+        self.assertEqual(emails[0].primary, email_primary1)
+
+        email2 = 'example2@example.com'
+        email_type2 = 'work'
+        email_primary2 = False
+        email_verified2 = False
+
+        user.add_email(email2, primary=email_primary2, type=email_type2,
+            verified=email_verified2)
+
+        emails = user.get_emails()
+        self.assertEqual(len(emails), 2)
+        # TOD: change this to a get using the position is to fragile
+        self.assertEqual(emails[0].value, email2)
+        self.assertEqual(emails[0].type, email_type2)
+        self.assertEqual(emails[0].primary, email_primary2)
+
+        # Adding the first email again should have no effect
+        user.add_email(email1, primary=email_primary1, type=email_type1)
+        emails = user.get_emails()
+        self.assertEqual(len(emails), 2)
 
         # Duplicate
         # New user trying to register existing users email
         # should raise a DuplicatePropertyError
-        email = 'example@example.com'
-        user2 = m.create_user(auth_id='auth_id_2', password_raw='foo')
+        user2 = m.create_user(auth_ids='auth_id_2', password_raw='foo')
         self.assertRaises(models.DuplicatePropertyError, user2.add_email,
-            email)
-        self.assertFalse(user2._has_email(email))
-        self.assertTrue(len(user.emails), 0)
+            email1)
+        self.assertTrue(len(user.get_emails()), 0)
         error = None
         try:
-            user2.add_email(email)
+            user2.add_email(email1)
         except models.DuplicatePropertyError, e:
             error = e
         self.assertEquals(error.values, ['email'])
 
-    def test_find_user(self):
-        # New User non-used email
-        m = models.User
-        email = 'example@example.com'
-        user = m.create_user(auth_id='auth_id_1', password_raw='foo')
-        user.add_email(email)
+#    def test_find_user(self):
+#        # New User non-used email
+#        m = models.User
+#        email = 'example@example.com'
+#        user = m.create_user(auth_ids='auth_id_1')
+#        user.add_email(email)
+#
+#        # Find by auth_id
+#        queried_user = m._find_user('auth_id_1', email)
+#        self.assertEquals(queried_user, user)
+#
+#        # Find by email
+#        queried_user = m.find_user('auth_id_not_found', email)
+#        self.assertEquals(queried_user, user)
+#
+#        # Don't find
+#        queried_user = m.find_user('auth_id_not_found', 'fake@example.com')
+#        self.assertEquals(queried_user, None)
 
-        # Find by auth_id
-        queried_user = m.find_user('auth_id_1', email)
-        self.assertEquals(queried_user, user)
+    def test_get_or_create_by_profile(self):
+        # No Emails
+        auth_id1 = 'test:unique_ID1'
+        email1_value = None
+        user_info1 = {
+            'info': {
+                'emails': email1_value
+            }
+        }
+        p1 = models.UserProfile.get_or_create(auth_id1, user_info1)
+        u1 = models.User.get_or_create_by_profile(p1)
+        u1_ds = models.User.get_by_auth_id(p1.key.id())
+        self.assertEqual(u1, u1_ds)
 
-        # Find by email
-        queried_user = m.find_user('auth_id_not_found', email)
-        self.assertEquals(queried_user, user)
+        # Add Another uid + email
+        auth_id2 = 'test:unique_ID2'
+        email2_value = 'test2@example.com'
+        user_info2 = {
+            'info': {
+                'emails': [
+                    {
+                        'value': email2_value
+                    }
+                ]
+            }
+        }
+        p2 = models.UserProfile.get_or_create(auth_id2, user_info2)
+        u2 = models.User.get_or_create_by_profile(p2)
+        self.assertTrue(u2 is not None)
+        u2_ds = models.User.get_by_auth_id(p2.key.id())
+        self.assertEqual(u2, u2_ds)
 
-        # Don't find
-        queried_user = m.find_user('auth_id_not_found', 'fake@example.com')
-        self.assertEquals(queried_user, None)
+        # Get by p1
+        u3 = models.User.get_or_create_by_profile(p1)
+        self.assertEqual(u3, u1)
 
+        # Get by p2
+        u4 = models.User.get_or_create_by_profile(p2)
+        self.assertEqual(u4, u2)
+
+        # Add values to p1
+        email1_value = 'new@example.com'
+        display_name = 'Bob Jones'
+        user_info1_extended = {
+            'info': {
+                'emails': [
+                    {
+                        'value': email1_value,
+                        'type': 'home',
+                        'default': True,
+                        'verified': True,
+                    }
+                ],
+                'displayName': display_name
+            }
+        }
+        p1_extended = models.UserProfile.get_or_create(auth_id1, user_info1_extended)
+        u5 = models.User.get_or_create_by_profile(p1)
+        self.assertEqual(u5, u1)
+
+        # Raise duplicate email
+
+
+class TestUserToken(test_base.BaseTestCase):
+    def setUp(self):
+        super(TestUserToken, self).setUp()
+        self.register_model('User', models.User)
+        self.register_model('UserToken', models.UserToken)
 
     def test_token(self):
         m = models.UserToken
@@ -184,19 +268,19 @@ class TestUser(test_base.BaseTestCase):
         token_3 = m.get(subject=subject, token=token)
         self.assertEqual(token_3, None)
 
-    def test_user_token(self):
-        m = models.User
-        auth_id = 'foo'
-
-        token = m.create_token(auth_id)
-        self.assertTrue(m.validate_token(auth_id, token))
-        m.delete_token(auth_id, token)
-        self.assertFalse(m.validate_token(auth_id, token))
-
-        token = m.create_token(auth_id, 'signup')
-        self.assertTrue(m.validate_token(auth_id, token, 'signup'))
-        m.delete_token(auth_id, token, 'signup')
-        self.assertFalse(m.validate_token(auth_id, token, 'signup'))
+#    def test_user_token(self):
+#        m = models.User
+#        auth_id = 'foo'
+#
+#        token = m.create_token(auth_id)
+#        self.assertTrue(m.validate_token(auth_id, token))
+#        m.delete_token(auth_id, token)
+#        self.assertFalse(m.validate_token(auth_id, token))
+#
+#        token = m.create_token(auth_id, 'signup')
+#        self.assertTrue(m.validate_token(auth_id, token, 'signup'))
+#        m.delete_token(auth_id, token, 'signup')
+#        self.assertFalse(m.validate_token(auth_id, token, 'signup'))
 
 
 class TestSession(test_base.BaseTestCase):

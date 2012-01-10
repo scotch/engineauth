@@ -5,31 +5,49 @@ ul.tabs
   li > a href="#profile" data-toggle="tab" | Profiles
   li > a href="#user" data-toggle="tab" | User
   li > a href="#session" data-toggle="tab" | Session
+  li > a href="#emails" data-toggle="tab" | Emails
 
 .tab-content
   #profile.tab-pane
-    % if profiles.__len__
-      h2 | Profiles
-      h5 | Connect additional accounts to view that data that EngineAuth collects.
-    % else
-      h2 | No Profiles
-      h5 | Connect a providers account to view the information that EngineAuth collects.
-    % for p in profiles
-      h3 | {{ p.key.id() }}
-      div id="{{ p.key.id() }}"
+    h2 | Profiles
+    % if profiles and profiles.__len__
+      h5 | Connect aditional providers account to view the information that EngineAuth collects.
+      % for p in profiles
+        h3 | {{ p.key.id() }}
         pre.prettyprint
           = p.to_dict()|do_pprint()
+    % else
+      .alert-message.block-message.info
+        No data yet. Try connecting an account
 
   #user.tab-pane
     h2 | User
-    pre.prettyprint
-      = user.to_dict()|do_pprint()
+    % if user
+      pre.prettyprint
+        = user.to_dict()|do_pprint()
+    % else
+      .alert-message.block-message.info
+        No data yet. Try connecting an account
 
   #session.tab-pane
     h2 | Session
-    pre.prettyprint
-      = session.to_dict()|do_pprint()
+    % if session
+      pre.prettyprint
+        = session.to_dict()|do_pprint()
+    % else
+      .alert-message.block-message.info
+        No data yet. Try connecting an account
 
+  #emails.tab-pane
+    h2 | Emails
+    % if emails and emails.__len__
+      % for e in emails
+        h3 | {{ e.key.id() }}
+        pre.prettyprint
+          = e.to_dict()|do_pprint()
+    % else
+      .alert-message.block-message.info
+        No data yet. Try connecting an account
 script
   | $(function () {
   |   window.prettyPrint && prettyPrint();

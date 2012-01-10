@@ -1,0 +1,4 @@
+cron:
+- description: wipe datastore
+  url: /tasks/whip-ds
+  schedule: every 60 minutes

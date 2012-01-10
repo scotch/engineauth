@@ -1,15 +1,10 @@
 from __future__ import absolute_import
-import urllib
 from apiclient.oauth import FlowThreeLegged
-from engineauth import models
 from engineauth.strategies.base import BaseStrategy
 import httplib2
 import cPickle as pickle
 
-
 __author__ = 'kyle.finley@gmail.com (Kyle Finley)'
-
-
 
 
 
@@ -27,13 +22,6 @@ class OAuthStrategy(BaseStrategy):
     def service(self, **kwargs):
         return _abstract()
 
-    def get_or_create_user_profile(self, auth_id, user_info,
-                                   email=None, **kwargs):
-        user = models.User.get_or_create(auth_id, email)
-        profile = models.Profile.get_or_create(auth_id, user_info,
-            credentials=kwargs.get('credentials'))
-        return user, profile
-
     def start(self, req):
         authorize_url = req.flow.step1_get_authorize_url(
             oauth_callback=self.callback_uri)
@@ -43,24 +31,19 @@ class OAuthStrategy(BaseStrategy):
     def callback(self, req):
         flow = pickle.loads(req.session.data.get(self.session_key))
         if flow is None:
-            raise Exception('Pickle error')
+            self.raise_error('And Error has occurred. Please try again.')
         req.credentials = flow.step2_exchange(req.params)
         user_info = self.user_info(req)
-        try:
-            user, profile = self.get_or_create_user_profile(
-                auth_id=user_info['auth_id'],
-                user_info=user_info,
-                email=user_info.get('info').get('email'),
-                credentials=req.credentials)
-            self.add_user_to_session(req, user.get_id())
-            return self.get_redirect_uri(req)
-        except Exception, e:
-            # TODO: Handle error
-            raise e
+        profile = self.get_or_create_profile(
+            auth_id=user_info['auth_id'],
+            user_info=user_info,
+            credentials=req.credentials)
+        req.load_user_by_profile(profile)
+        return req.get_redirect_uri()
 
     def handle_request(self, req):
         self.callback_uri = '{0}{1}/{2}/callback'.format(req.host_url,
-            req.config['base_uri'], req.provider)
+            self.config['base_uri'], req.provider)
         self.session_key = '_auth_strategy:{0}'.format(req.provider)
 
         discovery = {
@@ -87,7 +70,7 @@ class OAuthStrategy(BaseStrategy):
             discovery=discovery,
             consumer_key=req.provider_config.get('client_id'),
             consumer_secret=req.provider_config.get('client_secret'),
-            user_agent='engine_auth'
+            user_agent='EngineAuth'
         )
         if not req.provider_params:
             return self.start(req)

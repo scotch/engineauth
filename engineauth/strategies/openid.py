@@ -15,12 +15,10 @@
 # limitations under the License.
 #
 from __future__ import absolute_import
-# TODO: WORK IN PROGRESS.
+# TODO: WORK IN PROGRESS. DO NOT USE
 
 import cPickle as pickle
-from engineauth import models
 from engineauth.strategies.base import BaseStrategy
-from google.appengine.api import users
 from google.appengine.api import memcache
 from openid.consumer.consumer import Consumer
 from openid.extensions import sreg
@@ -120,18 +118,10 @@ class OpenIDStrategy(BaseStrategy):
     def user_info(self, req):
         pass
 
-    def get_or_create_user_profile(self, auth_id, user_info,
-                                   email=None, **kwargs):
-        user = models.User.get_or_create(auth_id, email)
-        profile = models.Profile.get_or_create(auth_id, user_info)
-        return user, profile
-
     def start(self, req):
-        self.set_redirect(req)
-
         openid_url = req.GET.get('openid_url')
         if not openid_url:
-            raise('opeinid_url not provided')
+            return self.raise_error('opeinid_url not provided')
         try:
             authorize_url = req.flow.step1_get_authorize_url(
                 openid_url, self.callback_uri)
@@ -142,12 +132,11 @@ class OpenIDStrategy(BaseStrategy):
 
     def callback(self, req):
         user_info = self.user_info(req)
-        user, profile = self.get_or_create_user_profile(
+        profile = self.get_or_create_profile(
             auth_id=user_info['uid'],
-            email=user_info.get('email'),
             user_info=user_info)
-        self.add_user_to_session(req, user.get_id())
-        return self.get_redirect_uri(req)
+        req.load_user_by_profile(profile)
+        return req.get_redirect_uri()
 
     def handle_request(self, req):
         self.callback_uri = '{0}{1}/{2}/callback'.format(req.host_url,
@@ -157,14 +146,11 @@ class OpenIDStrategy(BaseStrategy):
             'session': {},
             'flow': ''
         }
-        try:
-            req.flow = FlowOpenID(
-                session=req.session.data[self.session_key]['session'],
-                store=AppEngineStore,
-                host_url=req.host_url,
-            )
-        except Exception, e:
-            raise e
+        req.flow = FlowOpenID(
+            session=req.session.data[self.session_key]['session'],
+            store=AppEngineStore,
+            host_url=req.host_url,
+        )
         if not req.provider_params:
             return self.start(req)
         else:

@@ -9,6 +9,7 @@ import httplib2
 
 class GoogleStrategy(OAuth2Strategy):
 
+    @property
     def options(self):
         return {
             'provider': 'google',
@@ -24,41 +25,16 @@ class GoogleStrategy(OAuth2Strategy):
     def user_info(self, req):
         user = self.service().people().get(userId='me').execute(self.http(req))
         auth_id = User.generate_auth_id('google', user['id'], 'plus')
+        urls = user.get('urls')
+        if user.get('url'):
+            urls.append({u'type':u'google#plus', u'value': user.get('url')})
         return {
             'auth_id': auth_id,
-            'uid': user['id'],
             'info': {
                 'id': user['id'],
                 'displayName': user.get('displayName'),
-#                'name': {
-#                    'formatted': user.get('name'),
-#                    'familyName': user.get('last_name'),
-#                    'givenName': user.get('first_name'),
-#                    'middleName': user.get('middle_name'),
-#                    'honorificPrefix': None,
-#                    'honorificSuffix': None,
-#                    },
-#                'birthday': user.get('birthday'), # user_birthday
-#                'gender': user.get('gender'),
-#                'timezone': user.get('timezone'),
-#                'locale': user.get('locale'),
-#                'verified': user.get('verified'),
-#                'email': user.get('email'), # email
-#                'nickname': user.get('username'),
-#                'location': user.get('location'), # user_location
-#                'aboutMe': user.get('aboutMe'),
-                'image': {
-                    'url': user.get('image').get('url'),
-                },
-#                'urls': [
-#                    {
-#                        'type': 'profile',
-#                        'value': user.get('link'),
-#                    }
-#                ],
             },
             'extra': {
                 'raw_info': user,
                 }
         }
-

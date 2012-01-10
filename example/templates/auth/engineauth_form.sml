@@ -4,12 +4,14 @@
 |   ('twitter', '/auth/twitter'),
 |   ('yahoo', '/auth/appengine_openid?provider=yahoo.com'),
 |   ('linkedin', '/auth/linkedin'),
-|   ('aol', '/auth/appengine_openid?provider=yahoo.com'),
+|   ('aol', '/auth/appengine_openid?provider=aol.com'),
 |   ('myopenid', '/auth/appengine_openid?provider=myopenid.com'),
 |   ('myspace', '/auth/appengine_openid?provider=myspace.com'),
+|   ('github', '/auth/github'),
 | ] -%}
 
 .ea-form.row.well
+  % include "partials/messages.html"
   .span6
     h4 | To get started, login with one of your existing accounts.
     ul

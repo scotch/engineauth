@@ -11,9 +11,7 @@
     :copyright: 2011 by tipfy.org.
     :license: Apache Sotware License, see LICENSE for details.
 """
-import time
-
-from appengine_config import engineauth
+from engineauth import config
 import ndb
 from webapp2_extras import securecookie
 from webapp2_extras import security
@@ -28,28 +26,27 @@ class DuplicatePropertyError(Error):
         self.values = value
         self.msg = u'duplicate properties(s) were found.'
 
-
-class Email(ndb.Model):
-    value = ndb.StringProperty(indexed=True)
-    type = ndb.StringProperty(indexed=False)
-    primary = ndb.BooleanProperty(default=False, indexed=False)
-    verified = ndb.BooleanProperty(default=False, indexed=True)
-
-class Profile(ndb.Expando):
+class UserProfile(ndb.Expando):
+    """
+    ``ndb.Expando`` is used to store the user_info object as well as any adtion
+    """
+    #: dafadsfas
     _default_indexed = False
     user_info = ndb.JsonProperty(indexed=False, compressed=True)
     credentials = ndb.PickleProperty(indexed=False)
 
     @classmethod
-    def get_or_create(cls, auth_id, user_info, **kwarg):
+    def get_or_create(cls, auth_id, user_info, **kwargs):
+        """
+
+        """
         profile = cls.get_by_id(auth_id)
         if profile is None:
             profile = cls(id=auth_id)
         profile.user_info = user_info
-        profile.populate(**kwarg)
+        profile.populate(**kwargs)
         profile.put()
         return profile
-
 
 class UserToken(ndb.Model):
     """Stores validation tokens for users."""
@@ -127,25 +124,53 @@ class UserToken(ndb.Model):
         return cls.query(cls.subject == subject, cls.token == token).get()
 
 
+class UserEmail(ndb.Model):
+    user_id = ndb.StringProperty(indexed=True)
+    value = ndb.StringProperty(indexed=True)
+    type = ndb.StringProperty(indexed=False)
+    primary = ndb.BooleanProperty(default=False, indexed=False)
+    verified = ndb.BooleanProperty(default=False, indexed=True)
+
+    @classmethod
+    def create(cls, address, user_id, primary=None, verified=None, type=None):
+        address = address.lower()
+        email = cls.get_by_id(address)
+        if email is not None and email.user_id != user_id:
+            raise DuplicatePropertyError(['email'])
+        email = cls(id=address,
+            value=address,
+            user_id=user_id,
+            primary=primary,
+            verified=verified,
+            type=type)
+        email.put()
+        return cls
+
+    @classmethod
+    def get_by_user(cls, user_id):
+        user_id = str(user_id)
+        return cls.query(cls.user_id == user_id).fetch(25)
+
+    @classmethod
+    def get_by_emails(cls, addresses):
+        assert isinstance(addresses, list), 'Email addresses must be a list'
+        if not addresses: return None
+        results = cls.query(cls.value.IN(addresses)).fetch(25)
+        return results or None
+
+
+
 class User(ndb.Expando):
     """Stores user authentication credentials or authorization ids."""
-
-    #: The model used to ensure uniqueness.
-#    unique_model = Unique
-    #: The model used to store tokens.
-    token_model = UserToken
-    email_model = Email
-    profile_model = Profile
+    email_model = UserEmail
 
     created = ndb.DateTimeProperty(auto_now_add=True)
     updated = ndb.DateTimeProperty(auto_now=True)
     # ID for third party authentication, e.g. 'google:username'. UNIQUE.
     auth_ids = ndb.StringProperty(repeated=True)
-    emails = ndb.StructuredProperty(Email, repeated=True)
+    # primary email address used for
+    email = ndb.StringProperty(indexed=False)
 
-    # Hashed password. Not required because third party authentication
-    # doesn't use password.
-#    password = ndb.StringProperty()
     authenticated = ndb.BooleanProperty(default=False)
 
     def get_id(self):
@@ -182,20 +207,7 @@ class User(ndb.Expando):
             provider = '{0}#{1}'.format(provider, subprovider)
         return '{0}:{1}'.format(provider, uid)
 
-    def _has_email(self, email):
-        """Convenience method that checks if a User has the provided email.
-
-        :param email:
-            A String representing the email to check for
-        :return:
-            True if email is present, else False
-        """
-        for e in self.emails:
-            if e.value == email:
-                return True
-        return False
-
-    def add_auth_id(self, auth_id):
+    def _add_auth_id(self, auth_id):
         """A helper method to add additional auth ids to a User
 
         :param auth_id:
@@ -219,49 +231,8 @@ class User(ndb.Expando):
             self.put()
             return self
 
-    def add_email(self, value, type=u'home', primary=False, verified=False):
-        """Adds and email address to User
-
-        :param value:
-            A String representing the email address
-        :param type:
-            A String representing the type of email.
-            E.g.
-            - 'home'
-            - 'work'
-            - 'other'
-            default: 'home'
-        :param primary:
-            A Boolean indicting weather or not the email should be
-            used for communication
-            default: False
-        :param verified:
-            A Boolean indicting weather or not the email has been
-            verified to be an active address owned by the User
-            default: False
-        :return:
-            User object if the add succeeds
-        :raise:
-            ExistingAccountError is raised if the email address is
-            already in the system user a different User account
-        """
-        if not value:
-            return self
-        value = value.lower()
-        # check if the user has already added the address
-        if self._has_email(value):
-            return self
-            # check for accounts using address
-        if self.__class__().get_by_email(value):
-            raise DuplicatePropertyError(value=['email'])
-        email = self.email_model(value=value, type=type,
-                      primary=primary, verified=verified)
-        self.emails.append(email)
-        self.put()
-        return self
-
     @classmethod
-    def get_by_auth_id(cls, auth_id):
+    def _get_by_auth_id(cls, auth_id):
         """Returns a user object based on a auth_id.
 
         :param auth_id:
@@ -273,108 +244,108 @@ class User(ndb.Expando):
             A user object.
         """
         return cls.query(cls.auth_ids == auth_id).get()
+    get_by_auth_id = _get_by_auth_id
+
+    def get_emails(self):
+        return self.email_model.get_by_user(self.get_id())
+
+    def add_email(self, value, primary=None, verified=None, type=None):
+        return self.email_model.create(value, self.get_id(), primary=primary,
+            verified=verified, type=type)
+
+#    def _has_email(self, email):
+#        """Convenience method that checks if a User has the provided email.
+#
+#        :param email:
+#            A String representing the email to check for
+#        :return:
+#            True if email is present, else False
+#        """
+#        for e in self.emails:
+#            if e.value == email:
+#                return True
+#        return False
+#
+#    def _add_email(self, value, type=u'home', primary=False, verified=False):
+#        """Adds and email address to User
+#
+#        :param value:
+#            A String representing the email address
+#        :param type:
+#            A String representing the type of email.
+#            E.g.
+#            - 'home'
+#            - 'work'
+#            - 'other'
+#            default: 'home'
+#        :param primary:
+#            A Boolean indicting weather or not the email should be
+#            used for communication
+#            default: False
+#        :param verified:
+#            A Boolean indicting weather or not the email has been
+#            verified to be an active address owned by the User
+#            default: False
+#        :return:
+#            User object if the add succeeds
+#        :raise:
+#            ExistingAccountError is raised if the email address is
+#            already in the system user a different User account
+#        """
+#        if not value:
+#            return self
+#        value = value.lower()
+#        # check if the user has already added the address
+#        if self._has_email(value):
+#            return self
+#            # check for accounts using address
+#        if self.__class__().get_by_email(value):
+#            raise DuplicatePropertyError(value=['email'])
+#        email = self.email_model(value=value, type=type,
+#                      primary=primary, verified=verified)
+#        self.emails.append(email)
+##        self.put()
+#        return self
+#
+#    def _add_emails(self, emails):
+#        assert isinstance(emails, list), 'Emails must be a list'
+#        for email in emails:
+#            pass
+#
+#    @classmethod
+#    def _get_by_emails(cls, emails):
+#        """Returns the first User by email address
+#
+#        :param emails:
+#            List of email addresses to search by
+#        :return:
+#            A User object
+#        """
+#        assert isinstance(emails, list), 'Emails must be a list'
+#        email = emails.lower()
+#        return cls.query(cls.emails.value == email).get()
 
     @classmethod
-    def get_by_auth_token(cls, user_id, token):
-        """Returns a user object based on a user ID and token.
-
-        :param user_id:
-            The user_id of the requesting user.
-        :param token:
-            The token string to be verified.
-        :returns:
-            A tuple ``(User, timestamp)``, with a user object and
-            the token timestamp, or ``(None, None)`` if both were not found.
-        """
-        token_key = cls.token_model.get_key(user_id, 'auth', token)
-        user_key = ndb.Key(cls, user_id)
-        # Use get_multi() to save a RPC call.
-        valid_token, user = ndb.get_multi([token_key, user_key])
-        if valid_token and user:
-            timestamp = int(time.mktime(valid_token.created.timetuple()))
-            return user, timestamp
-
-        return None, None
-
-    @classmethod
-    def get_by_email(cls, email):
-        """Returns the first User by email address
-
-        :param email:
-            String representing the email address to search by
-        :return:
-            A User object
-        """
-        email = email.lower()
-        return cls.query(cls.emails.value == email).get()
-
-    @classmethod
-    def create_token(cls, user_id, token_type='auth'):
-        """Creates a new token for a given user ID and token type.
-
-        :param user_id:
-            User unique ID.
-        :param token_type:
-            A String representing the type of taken.
-            Default: 'auth'
-        :returns:
-            A string with the authorization token.
-        """
-        return cls.token_model.create(user_id, token_type).token
-
-    @classmethod
-    def validate_token(cls, user_id, token, token_type='auth'):
-        """Checks for existence of a token, given user_id, token and token_type.
-
-        :param user_id:
-            User unique ID.
-        :param token_type:
-            A String representing the type of taken.
-            E.g.
-            - 'auth'
-            - 'signup'
-            Default: 'auth'
-        :param token:
-            The token string to be validated.
-        :returns:
-            A :class:`UserToken` or None if the token does not exist.
-        """
-        return cls.token_model.get(user=user_id, subject=token_type,
-                                   token=token) is not None
-
-    @classmethod
-    def delete_token(cls, user_id, token, token_type='auth'):
-        """Deletes a given token.
-
-        :param user_id:
-            User unique ID.
-        :param token_type:
-            A String representing the type of taken.
-            Default: 'auth'
-        :param token:
-            A string with the authorization token.
-        """
-        cls.token_model.get_key(user_id, token_type, token).delete()
-
-
-    @classmethod
-    def find_user(cls, auth_id, email=None):
+    def _find_user(cls, auth_id, emails=None):
         """Find User by auth_id and optionally email address
 
         :param auth_id:
             A String representing a unique id to find the user by
-        :param email:
-            Optional, an email address to search by if auth_id
+        :param emails:
+            Optional, list of email addresses to search by if auth_id
             returns None
         :return: A User by auth_id and optionally email
         """
         user = cls.get_by_auth_id(auth_id)
-        if user is None and email:
-            user = cls.get_by_email(email)
+        if user is None and emails:
+            # TODO: email should only be trusted if it is verified.
+            assert isinstance(emails, list), 'Emails must be a list'
+            address = [e['value'] for e in emails]
+            user = cls.email_model.get_by_emails(address)
         return user
 
     @classmethod
-    def create_user(cls, auth_id, **user_values):
+    def _create_user(cls, auth_ids, **user_values):
         """Creates a new user.
 
         :param auth_id:
@@ -397,28 +368,41 @@ class User(ndb.Expando):
             otherwise it is a list of duplicated unique properties that
             caused creation to fail.
         """
+        if not isinstance(auth_ids, list):
+            auth_ids = [auth_ids]
+        user_values['auth_ids'] = auth_ids
 
-        assert not isinstance(auth_id, list), \
-            'Creating a user with multiple auth_ids is not allowed, ' \
-            'please provide a single auth_id.'
-        email = user_values.get('emails', None)
-        if email:
-            user_values['emails'] = [cls.email_model(value=email)]
-        user_values['auth_ids'] = [auth_id]
-        if cls.get_by_auth_id(auth_id):
-            raise DuplicatePropertyError(value=['auth_id'])
+        for auth_id in user_values['auth_ids']:
+            if cls.get_by_auth_id(auth_id):
+                raise DuplicatePropertyError(value=['auth_id'])
+
         user = cls(**user_values)
         user.put()
         return user
+    create_user = _create_user
 
     @classmethod
-    def get_or_create(cls, auth_id, email, **kwarg):
-        user = cls.find_user(auth_id, email)
-        if user and email is not None:
-            user.add_email(email)
+    def _get_or_create(cls, auth_id, emails, **kwarg):
+        assert isinstance(emails, list), 'Emails must be a list'
+        user = cls._find_user(auth_id, emails)
+#        if user and emails is not None:
+#            user._add_emails(emails)
         if user is None:
-            user = cls.create_user(auth_id, emails=email)
+            user = cls._create_user(auth_id, **kwarg)
         return user
+
+    @classmethod
+    def get_or_create_by_profile(cls, profile):
+        assert isinstance(profile, UserProfile), \
+            'You must pass an instance of type engineauth.models.UserProfile.'
+        emails = profile.user_info.get('info').get('emails') or []
+        return cls._get_or_create(profile.key.id(), emails)
+
+
+    def add_profile(self, profile):
+        assert isinstance(profile, UserProfile),\
+            'You must pass an instance of type engineauth.models.UserProfile.'
+        return self._add_auth_id(profile.key.id())
 
 
 class Session(ndb.Model):
@@ -433,7 +417,8 @@ class Session(ndb.Model):
 
     @staticmethod
     def _serializer():
-        return securecookie.SecureCookieSerializer(engineauth['secret_key'])
+        engineauth_config = config.load_config()
+        return securecookie.SecureCookieSerializer(engineauth_config['secret_key'])
 
     def hash(self):
         """
@@ -488,9 +473,8 @@ class Session(ndb.Model):
     @classmethod
     def remove_inactive(cls, days_ago=30, now=None):
         import datetime
-        if now is None:
-            # for testing we want to be able to pass a value for now.
-            now = datetime.datetime.now()
+        # for testing we want to be able to pass a value for now.
+        now = now or datetime.datetime.now()
         dtd = now + datetime.timedelta(-days_ago)
         for s in cls.query(cls.updated < dtd).fetch():
             s.key.delete()

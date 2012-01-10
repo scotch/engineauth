@@ -1,6 +1,8 @@
 
 
 def load_config(default_values, user_values):
+    if user_values is None:
+        return default_values
     config = {}
     for k, v in user_values.items():
         if k in default_values:
@@ -11,6 +13,8 @@ def load_config(default_values, user_values):
                     or user_values[k][key] == '':
                         cloned[key] = value
                 config[k] = cloned
+            else:
+                config[k] = v
         else:
             config[k] = v
     for k, v in default_values.items():

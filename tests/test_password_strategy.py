@@ -1,14 +1,13 @@
 from webob import Request
 import webob
 from engineauth.middleware import AuthMiddleware
-from engineauth.middleware import default_config
 from engineauth import models
 import test_base
 import webapp2
 
 __author__ = 'kyle.finley@gmail.com (Kyle Finley)'
 
-app = AuthMiddleware(webapp2.WSGIApplication(), default_config)
+app = AuthMiddleware(webapp2.WSGIApplication())
 
 class TestPasswordStrategy(test_base.BaseTestCase):
 
@@ -22,7 +21,7 @@ class TestPasswordStrategy(test_base.BaseTestCase):
         # No User or Profile
         user = models.User.get_by_auth_id(auth_id)
         self.assertEqual(user, None)
-        p_count0 = models.Profile.query().count()
+        p_count0 = models.UserProfile.query().count()
         u_count0 = models.User.query().count()
         self.assertEqual(p_count0, 0)
         self.assertEqual(u_count0, 0)
@@ -34,11 +33,10 @@ class TestPasswordStrategy(test_base.BaseTestCase):
         # Retrieve user from datastore
         user = models.User.get_by_auth_id(auth_id)
         self.assertIn(auth_id, user.auth_ids)
-        self.assertTrue(user._has_email(email))
         # Retrieve profile from datastore
-        profile = models.Profile.get_by_id(auth_id)
+        profile = models.UserProfile.get_by_id(auth_id)
         self.assertTrue(profile is not None)
-        p_count1 = models.Profile.query().count()
+        p_count1 = models.UserProfile.query().count()
         u_count1 = models.User.query().count()
         self.assertEqual(p_count1, 1)
         self.assertEqual(u_count1, 1)
@@ -47,7 +45,7 @@ class TestPasswordStrategy(test_base.BaseTestCase):
             POST={'password': pasword, 'email': email})
         resp = req.get_response(app)
         # Make sure a new User is not created.
-        p_count2 = models.Profile.query().count()
+        p_count2 = models.UserProfile.query().count()
         u_count2 = models.User.query().count()
         self.assertEqual(p_count2, 1)
         self.assertEqual(u_count2, 1)
@@ -55,5 +53,4 @@ class TestPasswordStrategy(test_base.BaseTestCase):
         req = Request.blank('/auth/password',
             POST={'password': 'fakepass', 'email': email})
         resp = req.get_response(app)
-        self.assertEqual(resp.location, 'http://localhost/login')
 

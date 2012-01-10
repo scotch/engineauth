@@ -7,6 +7,7 @@ from engineauth.strategies.oauth import OAuthStrategy
 
 class TwitterStrategy(OAuthStrategy):
 
+    @property
     def options(self):
         return {
             'provider': 'twitter',
@@ -31,9 +32,8 @@ class TwitterStrategy(OAuthStrategy):
 
         return {
             'auth_id': auth_id,
-            'uid': user['id'], # Unique ID to the service provider
             'info': {
-                'id': user.get('id'),
+                'id': user.get('id'), # Unique ID to the service provider
                 'displayName': user.get('name'),
                 'name': {
                     'formatted': user.get('name'),
