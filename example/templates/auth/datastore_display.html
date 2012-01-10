@@ -1,5 +1,5 @@
 
-<h2>Your Datastore Values</h2>
+<h2>Your Datastore Values (Only visiable to you)</h2>
 
 <ul class="tabs">
   <li><a href="#profile" data-toggle="tab">Profiles</a></li>
@@ -16,7 +16,7 @@
       {% for p in profiles %}
         <h3>{{ p.key.id() }}</h3>
         <pre class="prettyprint">
-          {{ p.to_dict()|do_pprint }}
+          {{ p.to_dict()|do_pprint() }}
         </pre>
       {% endfor %}
     {% else %}
@@ -30,7 +30,7 @@
     <h2>User</h2>
     {% if user %}
       <pre class="prettyprint">
-        {{ user.to_dict()|do_pprint }}
+        {{ user.to_dict()|do_pprint() }}
       </pre>
     {% else %}
       <div class="alert-message block-message info">
@@ -43,7 +43,7 @@
     <h2>Session</h2>
     {% if session %}
       <pre class="prettyprint">
-        {{ session.to_dict()|do_pprint }}
+        {{ session.to_dict()|do_pprint() }}
       </pre>
     {% else %}
       <div class="alert-message block-message info">
@@ -58,7 +58,7 @@
       {% for e in emails %}
         <h3>{{ e.key.id() }}</h3>
         <pre class="prettyprint">
-          {{ e.to_dict()|do_pprint }}
+          {{ e.to_dict()|do_pprint() }}
         </pre>
       {% endfor %}
     {% else %}

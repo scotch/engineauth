@@ -1,5 +1,5 @@
 
-h2 | Your Datastore Values
+h2 | Your Datastore Values (Only visiable to you)
 
 ul.tabs
   li > a href="#profile" data-toggle="tab" | Profiles
