@@ -101,8 +101,8 @@ In your ``appengine_config.py`` add::
 
     # Twitter Authentication
     engineauth['provider.twitter'] = {
-        'client_id': 'l8nfb1saEW4mlTOARqunKg',
-        'client_secret': 'LCQweRuuGndhtNWihnwiDxs9npkNRII8GAgpGkYFi5c',
+        'client_id': 'CHAGNE_TO_TWITTER_CONSUMER_KEY',
+        'client_secret': 'CHAGNE_TO_TWITTER_CONSUMER_SECRET',
     }
 
 Acquiring Client Keys
@@ -160,6 +160,24 @@ Twitter
 5. Copy ``Consumer key`` as ``client_id``
 6. Copy ``Consumer secret`` as ``client_secret``
 
+LinkedIn
+********
+1. Go to: https://www.linkedin.com/secure/developer?newapp
+2. Fill in required fileds. You may leave ``OAuth Redirect URL:`` blank.
+3. Click ``Add Application``
+4. Copy ``API Key`` as ``client_id``
+5. Copy ``Secret Key`` as ``client_secret``
+6. Click ``Done``
+
+Github
+******
+1. Go to: https://github.com/account/applications/new
+2. Fill in required fileds. For ``Callback URL`` enter ``http://YOUR_DOMAIN.COM/auth/github/callback`
+3. Click ``Create Application``
+4. Copy ``Client ID`` as ``client_id``
+5. Copy ``Secret`` as ``client_secret``
+6. Click ``Done``
+
 App Engine OpenID
 *****************
 1. Go to: https://appengine.google.com
@@ -207,9 +225,13 @@ Which brings us to:
 
 Credits
 =======
-`EngineAuth`_ brings together ideas and code from many projects, the mose obvious of which are:
-- `Rodrigo Moraes`_: much of the code used in `EngineAuth`_ was adapted from `Rodrigo Moraes`_ work on the `webapp2`_ project.
+`EngineAuth`_ brings together ideas and code from many projects:
+
+- `Google App Engine and the Google App Engine Team`_: Obviously.
+- `Rodrigo Moraes`_: many aspects of this project were derived form his work on `webapp2`_. Including sessions, models, test setup, and even this documentation.
+- `Google Api Python Client`_: this library provides the foundation for `EngineAuth`_'s Authentication and Authorization.
 - `OmniAuth`_: the basic structure for ``Provider`` ``Strategies`` comes from `OmniAuth`_
+- TODO: add others.
 
 License
 =======
@@ -218,6 +240,7 @@ License
 .. _EngineAuth: http://code.scotchmedia.com/engineauth
 .. _EngineAuth Example: http://engineauth.scotchmedia.com
 .. _ndb: http://code.google.com/p/appengine-ndb-experiment/
+.. _Google Api Python Client: http://code.google.com/p/google-api-python-client/
 .. _oauth2client: http://code.google.com/p/google-api-python-client/
 .. _httplib2: http://code.google.com/p/google-api-python-client/
 .. _uri-templates: http://code.google.com/p/uri-templates
@@ -230,4 +253,4 @@ License
 .. _Rodrigo Moraes: https://plus.google.com/107102314343984959946
 .. _OmniAuth: https://github.com/intridea/omniauth/
 .. _webapp2: http://webapp-improved.appspot.com/
-
+.. _Google App Engine and the Google App Engine Team: http://code.google.com/appengine/
