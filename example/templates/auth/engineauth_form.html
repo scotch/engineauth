@@ -1,0 +1,41 @@
+{% set providers = [
+  ('google', '/auth/google'),
+  ('facebook', '/auth/facebook'),
+  ('twitter', '/auth/twitter'),
+  ('yahoo', '/auth/appengine_openid?provider=yahoo.com'),
+  ('linkedin', '/auth/linkedin'),
+  ('aol', '/auth/appengine_openid?provider=aol.com'),
+  ('myopenid', '/auth/appengine_openid?provider=myopenid.com'),
+  ('myspace', '/auth/appengine_openid?provider=myspace.com'),
+  ('github', '/auth/github'),
+] -%}
+
+<div class="ea-form row well">
+  {% include "partials/messages.html" %}
+  <div class="span6">
+    <h4>To get started, login with one of your existing accounts.</h4>
+    <ul>
+      {% for p, u in providers %}
+        <li class="provider-btn"><a href="{{ u }}" class="btn"><img src="/static/img/{{ p }}.png" /></a></li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="span5">
+    <h4>Or create a new one.</h4>
+    <div class="password-form">
+      <form method="POST" action="/auth/password" class="horizontal-form">
+        <fieldset class="control-group">
+          <label for="email" class="control-label">Email</label>
+          <div class="controls"><input type="text" name="email" class="input-medium" /></div>
+        </fieldset>
+        <fieldset class="control-group">
+          <label for="password" class="control-label">Password</label>
+          <div class="controls"><input type="password" name="password" class="input-medium" /></div>
+        </fieldset>
+        <fieldset class="form-actions">
+          <button type="submit" class="btn">Login</button>
+        </fieldset>
+      </form>
+    </div>
+  </div>
+</div>

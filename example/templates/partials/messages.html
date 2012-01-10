@@ -1,0 +1,10 @@
+{% if messages %}
+  <div data-dismiss="alert" class="alert-message block-message {{ messages[0]['level'] }}">
+    <a href="#" class="close">&times;</a>
+    <ul>
+      {% for message in messages %}
+        <li>{{ message['message']|safe }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}

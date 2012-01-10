@@ -1,0 +1,25 @@
+<ul class="breadcrumb">
+  <li>Account Settings</li>
+  <span class="divider">/</span>
+</ul>
+
+<div class="row">
+  <nav class="span3 columns">
+    {% include "accounts/shared/menu.html" %}
+  </nav>
+  <section class="span8 columns">
+    <h3>Email</h3>
+    {% include "partials/messages.html" %}
+    <form action="" method="POST">
+      <div class="clearfix">
+        <label for="email">Email</label>
+        <div class="input">
+          <input value="{{ user.email }}" type="text" name="email" class="span4" />
+        </div>
+      </div>
+      <div class="actions">
+        <input type="submit" value="Save Changes" class="btn primary" />
+      </div>
+    </form>
+  </section>
+</div>

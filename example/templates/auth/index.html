@@ -1,0 +1,22 @@
+<nav class="breadcrumb">
+  <li>Account Settings</li>
+  <span class="divider">/</span>
+</nav>
+
+<div class="row">
+  <nav class="span3">
+    {% include "accounts/shared/menu.html" %}
+  </nav>
+  <section class="span13">
+    {% include "partials/messages.html" %}
+    <h4>{{ user.displayName }}</h4>
+    <p><a href="/profiles/{{ user.user_id }}/edit">Edit Profile</a></p>
+    <h3>Email address</h3>
+    <p>
+      {{ user.email }}
+      <span><a href="/settings/email">Edit</a></span>
+    </p>
+
+    <h3>Notifications</h3>
+  </section>
+</div>

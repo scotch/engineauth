@@ -1,0 +1,29 @@
+application: engineauth
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: no
+
+builtins:
+- appstats: off
+- datastore_admin: on
+- remote_api: off
+- deferred: on
+
+libraries:
+- name: jinja2
+  version: "latest"
+
+handlers:
+- url: /(robots\.txt|favicon\.ico)
+  static_files: static/\1
+  upload: static/.*
+
+- url: /static
+  static_dir: static
+
+#- url: /-/api.*
+# script: services.application
+
+- url: /.*
+  script: main.application

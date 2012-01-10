@@ -1,0 +1,77 @@
+
+<h2>Your Datastore Values</h2>
+
+<ul class="tabs">
+  <li><a href="#profile" data-toggle="tab">Profiles</a></li>
+  <li><a href="#user" data-toggle="tab">User</a></li>
+  <li><a href="#session" data-toggle="tab">Session</a></li>
+  <li><a href="#emails" data-toggle="tab">Emails</a></li>
+</ul>
+
+<div class="tab-content">
+  <div class="tab-pane" id="profile">
+    <h2>Profiles</h2>
+    {% if profiles and profiles.__len__ %}
+      <h5>Connect aditional providers account to view the information that EngineAuth collects.</h5>
+      {% for p in profiles %}
+        <h3>{{ p.key.id() }}</h3>
+        <pre class="prettyprint">
+          {{ p.to_dict()|do_pprint }}
+        </pre>
+      {% endfor %}
+    {% else %}
+      <div class="alert-message block-message info">
+        No data yet. Try connecting an account
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="tab-pane" id="user">
+    <h2>User</h2>
+    {% if user %}
+      <pre class="prettyprint">
+        {{ user.to_dict()|do_pprint }}
+      </pre>
+    {% else %}
+      <div class="alert-message block-message info">
+        No data yet. Try connecting an account
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="tab-pane" id="session">
+    <h2>Session</h2>
+    {% if session %}
+      <pre class="prettyprint">
+        {{ session.to_dict()|do_pprint }}
+      </pre>
+    {% else %}
+      <div class="alert-message block-message info">
+        No data yet. Try connecting an account
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="tab-pane" id="emails">
+    <h2>Emails</h2>
+    {% if emails and emails.__len__ %}
+      {% for e in emails %}
+        <h3>{{ e.key.id() }}</h3>
+        <pre class="prettyprint">
+          {{ e.to_dict()|do_pprint }}
+        </pre>
+      {% endfor %}
+    {% else %}
+      <div class="alert-message block-message info">
+        No data yet. Try connecting an account
+      </div>
+    {% endif %}
+  </div>
+</div>
+<script>
+  $(function () {
+    window.prettyPrint && prettyPrint();
+    $('.tabs a:first').tab('show')
+    $('.pills a:first').tab('show')
+  })
+</script>

@@ -1,0 +1,13 @@
+
+<section class="span8">
+  {% include "partials/messages.html" %}
+  <form action="" method="POST">
+    {{ bootstrap_form_field(form.current) }}
+    <hr />
+    {{ bootstrap_form_field(form.password) }}
+    {{ bootstrap_form_field(form.confirm) }}
+    <div class="actions">
+      <input type="submit" value="Save Changes" class="btn primary" />
+    </div>
+  </form>
+</section>

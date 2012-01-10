@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>EngineAuth: Test Site</h1>
+  <h3>This is a test site to demonstrate the EngineAuth authentication flow.</h3>
+  <p>
+    <a href="http://code.scotchmedia.com/engineauth">EngineAuth Documentation</a>
+    - Read the full documentation.
+  </p>
+
+  <div class="alert-message block-message info">
+    To protect your privacy all data is deleted every 60 minutes.
+  </div>
+
+  {% include "auth/engineauth_form.html" %}
+
+  {% include "auth/datastore_display.html" %}
+{% endblock %}
