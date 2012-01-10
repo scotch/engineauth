@@ -546,7 +546,7 @@ class Property(ModelAttribute):
                  '_choices', '_validator', '_verbose_name']
   _positional = 1  # Only name is a positional argument.
 
-  @datastore_rpc._positional(1 + _positional)
+  @utils.positional(1 + _positional)
   def __init__(self, name=None, indexed=None, repeated=None,
                required=None, default=None, choices=None, validator=None,
                verbose_name=None):
@@ -1249,7 +1249,7 @@ class BlobProperty(Property):
 
   _attributes = Property._attributes + ['_compressed']
 
-  @datastore_rpc._positional(1 + Property._positional)
+  @utils.positional(1 + Property._positional)
   def __init__(self, name=None, compressed=False, **kwds):
     super(BlobProperty, self).__init__(name=name, **kwds)
     self._compressed = compressed
@@ -1397,12 +1397,18 @@ class JsonProperty(BlobProperty):
   # Use late import so the dependency is optional.
 
   def _to_base_type(self, value):
-    import simplejson
-    return simplejson.dumps(value, 2)
+    try:
+      import json
+    except ImportError:
+      import simplejson as json
+    return json.dumps(value, 2)
 
   def _from_base_type(self, value):
-    import simplejson
-    return simplejson.loads(value)
+    try:
+      import json
+    except ImportError:
+      import simplejson as json
+    return json.loads(value)
 
 
 class UserProperty(Property):
@@ -1420,7 +1426,7 @@ class UserProperty(Property):
   _auto_current_user = False
   _auto_current_user_add = False
 
-  @datastore_rpc._positional(1 + Property._positional)
+  @utils.positional(1 + Property._positional)
   def __init__(self, name=None, auto_current_user=False,
                auto_current_user_add=False, **kwds):
     super(UserProperty, self).__init__(name=name, **kwds)
@@ -1541,7 +1547,7 @@ class DateTimeProperty(Property):
   _auto_now = False
   _auto_now_add = False
 
-  @datastore_rpc._positional(1 + Property._positional)
+  @utils.positional(1 + Property._positional)
   def __init__(self, name=None, auto_now=False, auto_now_add=False, **kwds):
     super(DateTimeProperty, self).__init__(name=name, **kwds)
     # TODO: Disallow combining auto_now* and default?
@@ -1691,7 +1697,7 @@ class StructuredProperty(StructuredGetForDictMixin):
   _attributes = ['_modelclass'] + Property._attributes
   _positional = Property._positional + 1  # Add modelclass as positional arg.
 
-  @datastore_rpc._positional(1 + _positional)
+  @utils.positional(1 + _positional)
   def __init__(self, modelclass, name=None, **kwds):
     super(StructuredProperty, self).__init__(name=name, **kwds)
     if self._repeated:
@@ -1789,10 +1795,11 @@ class StructuredProperty(StructuredGetForDictMixin):
     # but that seems a rare case, so for now I don't care.
     ok = super(StructuredProperty, self)._has_value(entity)
     if ok and rest:
-      subent = self._get_value(entity)
-      if subent is None:
+      lst = self._get_base_value_unwrapped_as_list(entity)
+      if len(lst) != 1 or lst == [None]:
         raise RuntimeError('Failed to retrieve sub-entity of StructuredProperty'
                            ' %s' % self._name)
+      subent = lst[0]
       subprop = subent._properties.get(rest[0])
       if subprop is None:
         ok = False
@@ -1887,7 +1894,7 @@ class LocalStructuredProperty(StructuredGetForDictMixin, BlobProperty):
   _attributes = ['_modelclass'] + BlobProperty._attributes
   _positional = BlobProperty._positional + 1  # Add modelclass as positional.
 
-  @datastore_rpc._positional(1 + _positional)
+  @utils.positional(1 + _positional)
   def __init__(self, modelclass, name=None, compressed=False, **kwds):
     super(LocalStructuredProperty, self).__init__(name=name,
                                                   compressed=compressed,
@@ -2143,7 +2150,7 @@ class Model(object):
   _key = ModelKey()
   key = _key
 
-  @datastore_rpc._positional(1)
+  @utils.positional(1)
   def __init__(self, key=None, id=None, parent=None, **kwds):
     """Creates a new instance of this model (a.k.a. as an entity).
 
@@ -2415,7 +2422,7 @@ class Model(object):
     self._properties[prop._name] = prop
     return prop
 
-  @datastore_rpc._positional(1)
+  @utils.positional(1)
   def _to_dict(self, include=None, exclude=None):
     """Return a dict containing the entity's property values.
 
@@ -2770,7 +2777,7 @@ class Expando(Model):
     del self._properties[name]
 
 
-@datastore_rpc._positional(1)
+@utils.positional(1)
 def transaction(callback, **ctx_options):
   """Run a callback in a transaction.
 
@@ -2795,7 +2802,7 @@ def transaction(callback, **ctx_options):
   return fut.get_result()
 
 
-@datastore_rpc._positional(1)
+@utils.positional(1)
 def transaction_async(callback, **kwds):
   """Run a callback in a transaction.
 
@@ -2811,7 +2818,7 @@ def in_transaction():
   return tasklets.get_context().in_transaction()
 
 
-@datastore_rpc._positional(1)
+@utils.positional(1)
 def transactional(func):
   """Decorator to make a function automatically run in a transaction.
 

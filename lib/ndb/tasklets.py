@@ -131,6 +131,41 @@ class _State(utils.threading_local):
 _state = _State()
 
 
+# Tuple of exceptions that should not be logged (except in debug mode).
+_flow_exceptions = ()
+
+
+def add_flow_exception(exc):
+  """Add an exception that should not be logged.
+
+  The argument must be a subclass of Exception.
+  """
+  global _flow_exceptions
+  if not isinstance(exc, type) or not issubclass(exc, Exception):
+    raise TypeError('Expected an Exception subclass, got %r' % (exc,))
+  as_set = set(_flow_exceptions)
+  as_set.add(exc)
+  _flow_exceptions = tuple(as_set)
+
+
+def _init_flow_exceptions():
+  """Internal helper to initialize _flow_exceptions.
+
+  This automatically adds webob.exc.HTTPException, if it can be imported.
+  """
+  global _flow_exceptions
+  _flow_exceptions = ()
+  try:
+    from webob import exc
+  except ImportError:
+    pass
+  else:
+    add_flow_exception(exc.HTTPException)
+
+
+_init_flow_exceptions()
+
+
 class Future(object):
   """A Future has 0 or more callbacks.
 
@@ -177,20 +212,20 @@ class Future(object):
     if self._done:
       if self._exception is not None:
         state = 'exception %s: %s' % (self._exception.__class__.__name__,
-                                   self._exception)
+                                      self._exception)
       else:
         state = 'result %r' % (self._result,)
     else:
       state = 'pending'
     line = '?'
     for line in self._where:
-      if 'ndb/tasklets.py' not in line:
+      if 'tasklets.py' not in line:
         break
     if self._info:
-      line += ' for %s;' % self._info
+      line += ' for %s' % self._info
     if self._geninfo:
-      line += ' %s;' % self._geninfo
-    return '<%s %x created by %s %s>' % (
+      line += ' %s' % self._geninfo
+    return '<%s %x created by %s; %s>' % (
       self.__class__.__name__, id(self), line, state)
 
   def dump(self):
@@ -331,11 +366,24 @@ class Future(object):
       self.set_result(result)
       return
 
+    except GeneratorExit:
+      # In Python 2.5, this derives from Exception, but we don't want
+      # to handle it like other Exception instances.  So we catch and
+      # re-raise it immediately.  See issue 127.  http://goo.gl/2p5Pn
+      # TODO: Remove when Python 2.5 is no longer supported.
+      raise
+
     except Exception, err:
       _, _, tb = sys.exc_info()
-      logging.warning('%s raised %s(%s)',
-                      info, err.__class__.__name__, err,
-                      exc_info=(logging.getLogger().level <= logging.INFO))
+      if isinstance(err, _flow_exceptions):
+        logging_debug('%s raised %s(%s)',
+                      info, err.__class__.__name__, err)
+      elif logging.getLogger().level > logging.INFO:
+        logging.warning('%s raised %s(%s)',
+                        info, err.__class__.__name__, err)
+      else:
+        logging.warning('%s raised %s(%s)',
+                        info, err.__class__.__name__, err, exc_info=True)
       self.set_exception(err, tb)
       return
 
@@ -363,6 +411,8 @@ class Future(object):
           for subfuture in value:
             mfut.add_dependent(subfuture)
           mfut.complete()
+        except GeneratorExit:
+          raise
         except Exception, err:
           _, _, tb = sys.exc_info()
           mfut.set_exception(err, tb)
@@ -376,6 +426,8 @@ class Future(object):
   def _on_rpc_completion(self, rpc, gen):
     try:
       result = rpc.get_result()
+    except GeneratorExit:
+      raise
     except Exception, err:
       _, _, tb = sys.exc_info()
       self._help_tasklet_along(gen, exc=err, tb=tb)
@@ -482,6 +534,8 @@ class MultiFuture(Future):
       raise RuntimeError('MultiFuture done before finishing.')
     try:
       result = [r.get_result() for r in self._results]
+    except GeneratorExit:
+      raise
     except Exception, err:
       _, _, tb = sys.exc_info()
       self.set_exception(err, tb)
@@ -836,6 +890,8 @@ class ReducingFuture(Future):
       return  # Already done.
     try:
       val = fut.get_result()
+    except GeneratorExit:
+      raise
     except Exception, err:
       _, _, tb = sys.exc_info()
       self.set_exception(err, tb)
@@ -846,6 +902,8 @@ class ReducingFuture(Future):
       self._queue.clear()
       try:
         nval = self._reducer(todo)
+      except GeneratorExit:
+        raise
       except Exception, err:
         _, _, tb = sys.exc_info()
         self.set_exception(err, tb)
@@ -867,6 +925,8 @@ class ReducingFuture(Future):
       self._queue.clear()
       try:
         nval = self._reducer(todo)
+      except GeneratorExit:
+        raise
       except Exception, err:
         _, _, tb = sys.exc_info()
         self.set_exception(err, tb)
