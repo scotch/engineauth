@@ -23,11 +23,17 @@ class GoogleStrategy(OAuth2Strategy):
         return build(name, version, http=httplib2.Http(memcache))
 
     def user_info(self, req):
-        user = self.service().people().get(userId='me').execute(self.http(req))
-        auth_id = User.generate_auth_id('google', user['id'], 'plus')
-        urls = user.get('urls')
-        if user.get('url'):
-            urls.append({u'type':u'google#plus', u'value': user.get('url')})
+        try:
+            user = self.service().people().get(userId='me').execute(self.http(req))
+            auth_id = User.generate_auth_id('google', user['id'], 'plus')
+            urls = user.get('urls')
+            if user.get('url'):
+                urls.append({u'type':u'google#plus', u'value': user.get('url')})
+        except Exception:
+            return self.raise_error('There was an error contacting Google Plus. '
+                                    'Note this strategy requires a Google Plus Account. '
+                                    'If you have a Google Plus Account '
+                                    'please try again.')
         return {
             'auth_id': auth_id,
             'info': {
