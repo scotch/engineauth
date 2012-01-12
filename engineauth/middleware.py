@@ -1,7 +1,7 @@
 from __future__ import absolute_import
-from engineauth.config import load_config
-from engineauth import utils
 from engineauth import models
+from engineauth import utils
+from engineauth.config import load_config
 import re
 from webob import Response
 from webob import Request
@@ -51,9 +51,15 @@ class EngineAuthRequest(Request):
         self.session_hash = session_hash
         return self
 
+    def _get_user_class(self):
+        try:
+            return utils.import_class(self._config['user_model'])
+        except Exception:
+            return models.User
+
     def _load_user(self):
         if self.session is not None and self.session.user_id:
-            self.user = models.User.get_by_id(int(self.session.user_id))
+            self.user = self._get_user_class().get_by_id(int(self.session.user_id))
             if self.user is None:
                 # TODO: If the user_id from the session returns no user,
                 # then remove it.
@@ -68,7 +74,7 @@ class EngineAuthRequest(Request):
             self.user.add_profile(profile)
         # else get or create a user based on the profile
         else:
-            self.user = models.User.get_or_create_by_profile(profile)
+            self.user = self._get_user_class().get_or_create_by_profile(profile)
         # Add user to session
         self.session.user_id = self.user.get_id()
     load_user_by_profile = _load_user_by_profile
@@ -97,7 +103,7 @@ class EngineAuthRequest(Request):
         try:
             return self.session.data.pop('_redirect_uri').encode('utf-8')
         except KeyError:
-            return self.ea_config['success_uri']
+            return self._config['success_uri']
     get_redirect_uri = _get_redirect_uri
 
     def _set_globals(self, environ):
@@ -119,10 +125,10 @@ class AuthMiddleware(object):
             return self.app(environ, start_response)
         # load session
         req = EngineAuthRequest(environ)
+        req._config = self._config
         req._load_session()
         req._load_user()
         req._set_redirect_uri()
-        req.ea_config = self._config
         resp = None
         # If the requesting url is for engineauth load the strategy
         if environ['PATH_INFO'].startswith(self._config['base_uri']):

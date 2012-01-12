@@ -1,3 +1,5 @@
+import threading
+from webob import Request
 import webob
 from engineauth import models
 from engineauth.middleware import EngineAuthRequest
@@ -24,6 +26,7 @@ class BaseStrategy(object):
 
     def __call__(self, environ, start_response):
         req = EngineAuthRequest(environ)
+        req._config = self.config
         req.provider_config = self.config['provider.{0}'.format(req.provider)]
         # TODO: This area needs to be reworked. There needs to be
         # a better way to handle errors
