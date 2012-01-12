@@ -28,9 +28,9 @@ class DuplicatePropertyError(Error):
 
 class UserProfile(ndb.Expando):
     """
-    ``ndb.Expando`` is used to store the user_info object as well as any adtion
+    ``ndb.Expando`` is used to store the user_info object as well as
+    any additional information specific to a strategy.
     """
-    #: dafadsfas
     _default_indexed = False
     user_info = ndb.JsonProperty(indexed=False, compressed=True)
     credentials = ndb.PickleProperty(indexed=False)
