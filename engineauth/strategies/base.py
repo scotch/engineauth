@@ -1,5 +1,3 @@
-import threading
-from webob import Request
 import webob
 from engineauth import models
 from engineauth.middleware import EngineAuthRequest
