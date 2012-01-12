@@ -8,7 +8,7 @@ engineauth = {
     'success_uri': '/',
     'secret_key': 'CHANGE_TO_A_SECRET_KEY',
     # Change to provide a subclassed model
-    'user_model': 'models.EAUser',
+    'user_model': 'engineauth.models.User',
 }
 
 engineauth['provider.google'] = {
