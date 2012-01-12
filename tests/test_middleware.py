@@ -222,7 +222,7 @@ class TestAuthMiddleware(test_base.BaseTestCase):
         req = EngineAuthRequest.blank('/auth/google')
         req._load_session()
         req.set_redirect_uri()
-        req.ea_config = {'success_uri': '/callback'}
+        req._config = {'success_uri': '/callback'}
         redirect_uri = req.get_redirect_uri()
         self.assertEqual(redirect_uri, '/callback')
 
@@ -230,13 +230,13 @@ class TestAuthMiddleware(test_base.BaseTestCase):
         req = EngineAuthRequest.blank('/auth/google?next=/newcallback')
         req._load_session()
         req.set_redirect_uri()
-        req.ea_config = {'success_uri': '/callback'}
+        req._config = {'success_uri': '/callback'}
         redirect_uri = req.get_redirect_uri()
         self.assertEqual(redirect_uri, '/newcallback')
 
         req = EngineAuthRequest.blank('/auth/google?next=/newcallback&a=121&123=a')
         req._load_session()
         req.set_redirect_uri()
-        req.ea_config = {'success_uri': '/callback'}
+        req._config = {'success_uri': '/callback'}
         redirect_uri = req.get_redirect_uri()
         self.assertEqual(redirect_uri, '/newcallback')
