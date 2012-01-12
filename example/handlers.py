@@ -4,6 +4,8 @@ from webapp2_extras import jinja2
 from engineauth import models
 import ndb
 
+
+
 class Jinja2Handler(webapp2.RequestHandler):
     """
         BaseHandler for all requests all other handlers will
