@@ -6,7 +6,6 @@ threadsafe: no
 
 builtins:
 - appstats: off
-- datastore_admin: on
 - remote_api: off
 - deferred: on
 
