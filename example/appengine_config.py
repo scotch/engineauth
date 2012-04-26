@@ -10,7 +10,6 @@ engineauth = {
     # Comment out the following lines to use default
     # User and UserProfile models.
     'user_model': 'models.CustomUser',
-    # 'provider_profile_model': 'models.CustomProfile',
 }
 
 engineauth['provider.google'] = {
