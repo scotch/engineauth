@@ -9,10 +9,12 @@
 # Therefore, we ignore *.egg-info at the
 # repository level.
 *.egg-info
-
+build
+dist
 
 # OSX
 .DS_Store
 
 # PyCharm
 .idea
+
