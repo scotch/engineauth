@@ -12,7 +12,7 @@
     :license: Apache Sotware License, see LICENSE for details.
 """
 from engineauth import config
-import ndb
+from google.appengine.ext import ndb
 from webapp2_extras import securecookie
 from webapp2_extras import security
 

@@ -2,7 +2,7 @@
 import webapp2
 from webapp2_extras import jinja2
 from engineauth import models
-import ndb
+from google.appengine.ext import ndb
 
 
 class Jinja2Handler(webapp2.RequestHandler):

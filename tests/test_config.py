@@ -3,7 +3,7 @@ from engineauth.middleware import EngineAuthRequest
 from engineauth import models
 import test_base
 import webapp2
-import ndb
+from google.appengine.ext import ndb
 import engineauth.config
 
 __author__ = 'kyle.finley@gmail.com (Kyle Finley)'
