@@ -15,6 +15,8 @@ engineauth = {
 engineauth['provider.google'] = {
     'client_id': '673072897993.apps.googleusercontent.com',
     'client_secret': '4bNhP7gETK0DLOvIhC0rO39b',
+    'api_key': '',
+    'scope': 'https://www.googleapis.com/auth/plus.me',
     }
 
 engineauth['provider.github'] = {
