@@ -5,7 +5,6 @@
   <li><a href="#profile" data-toggle="tab">Profiles</a></li>
   <li><a href="#user" data-toggle="tab">User</a></li>
   <li><a href="#session" data-toggle="tab">Session</a></li>
-  <li><a href="#emails" data-toggle="tab">Emails</a></li>
 </ul>
 
 <div class="tab-content">
@@ -51,23 +50,8 @@
       </div>
     {% endif %}
   </div>
-
-  <div class="tab-pane" id="emails">
-    <h2>Emails</h2>
-    {% if emails and emails.__len__ %}
-      {% for e in emails %}
-        <h3>{{ e.key.id() }}</h3>
-        <pre class="prettyprint">
-          {{ e.to_dict()|do_pprint() }}
-        </pre>
-      {% endfor %}
-    {% else %}
-      <div class="alert-message block-message info">
-        No data yet. Try connecting an account
-      </div>
-    {% endif %}
-  </div>
 </div>
+
 <script>
   $(function () {
     window.prettyPrint && prettyPrint();

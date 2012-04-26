@@ -64,7 +64,7 @@ html
       | window.fbAsyncInit = function() {
       |   FB.init({
       |     appId      : "169981169706769", // App ID
-      |     channelURL : "//www.spatemp.com/channel", // Channel File
+      |     channelURL : "//engineauth.scotchmedia.com/channel", // Channel File
       |     status     : true, // check login status
       |     cookie     : true, // enable cookies to allow the server to access the session
       |     oauth      : true, // enable OAuth 2.0

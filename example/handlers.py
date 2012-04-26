@@ -4,6 +4,7 @@ from webapp2_extras import jinja2
 from engineauth import models
 import ndb
 
+
 class Jinja2Handler(webapp2.RequestHandler):
     """
         BaseHandler for all requests all other handlers will
@@ -42,26 +43,22 @@ class PageHandler(Jinja2Handler):
         session = self.request.session if self.request.session else None
         user = self.request.user if self.request.user else None
         profiles = None
-        emails = None
         if user:
             profile_keys = [ndb.Key('UserProfile', p) for p in user.auth_ids]
             profiles = ndb.get_multi(profile_keys)
-            emails = models.UserEmail.get_by_user(user.key.id())
         self.render_template('home.html', {
             'user': user,
             'session': session,
             'profiles': profiles,
-            'emails': emails,
         })
 
 def wipe_datastore():
     users = models.User.query().fetch()
     profiles = models.UserProfile.query().fetch()
-    emails = models.UserEmail.query().fetch()
     tokens = models.UserToken.query().fetch()
     sessions = models.Session.query().fetch()
 
-    for t in [users, profiles, emails, tokens, sessions]:
+    for t in [users, profiles, tokens, sessions]:
         for i in t:
             i.key.delete()
 
