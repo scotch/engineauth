@@ -7,15 +7,15 @@ engineauth = {
     # The user is sent here after successfull authentication.
     'success_uri': '/',
     'secret_key': 'CHANGE_TO_A_SECRET_KEY',
-    # Change to provide a subclassed model
-    'user_model': 'engineauth.models.User',
+    # Comment out the following lines to use default
+    # User and UserProfile models.
+    'user_model': 'models.CustomUser',
+    # 'provider_profile_model': 'models.CustomProfile',
 }
 
 engineauth['provider.google'] = {
     'client_id': '673072897993.apps.googleusercontent.com',
     'client_secret': '4bNhP7gETK0DLOvIhC0rO39b',
-    'api_key': '',
-    'scope': 'https://www.googleapis.com/auth/plus.me',
     }
 
 engineauth['provider.github'] = {
