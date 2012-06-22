@@ -17,14 +17,6 @@ routes = [
 
     # Wipe DS
     Route(r'/tasks/whip-ds', handler='handlers.WipeDSHandler', name='whip-ds'),
-
-    # Account Settings
-    Route(r'/settings', handler='handlers.AccountIndexHandler', name='account-index'),
-    Route(r'/settings/email', handler='handlers.AccountEmailHandler', name='account-email'),
-    Route(r'/settings/password', handler='handlers.AccountPasswordHandler', name='account-password'),
-    # Password
-    Route(r'/password/reset', handler='handlers.PasswordResetHandler', name='password-reset'),
-    Route(r'/password/reset/<token>', handler='handlers.PasswordResetCompleteHandler', name='password-reset-check'),
     ]
 
 config = {
