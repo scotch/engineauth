@@ -16,7 +16,7 @@ routes = [
     Route(r'/', handler='handlers.PageHandler:root', name='pages-root'),
 
     # Wipe DS
-    Route(r'/tasks/whip-ds', handler='handlers.WipeDSHandler', name='whip-ds'),
+    Route(r'/tasks/wipe-ds', handler='handlers.WipeDSHandler', name='wipe-ds'),
     ]
 
 config = {
