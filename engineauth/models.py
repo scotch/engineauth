@@ -442,8 +442,9 @@ class Session(ndb.Model):
     @classmethod
     def get_by_value(cls, value):
         v = cls.deserialize(value)
-        sid = v.get('session_id')
-        return cls.get_by_sid(sid) if sid else None
+        if v:
+            return cls.get_by_sid(v.get('session_id'))
+        return None
 
     @classmethod
     def get_by_sid(cls, sid):
