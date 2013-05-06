@@ -426,7 +426,10 @@ class Session(ndb.Model):
         This will be used to check for session changes.
         :return: A unique hash for the session
         """
-        return hash(str(self))
+        dataStr = repr(self.data)
+        return "{}.{}.{}.{}.{}".format(self.session_id, self.user_id,
+                                       str(self.updated), hash(dataStr),
+                                       len(dataStr))
 
     def serialize(self):
         values = self.to_dict(include=['session_id', 'user_id'])
