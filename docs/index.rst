@@ -58,7 +58,6 @@ Copy the ``engineauth`` directory and the contents of ``lib`` directory to your 
 
 Dependencies
 ------------
-- `ndb`_ - EngineAuth uses features of ndb that are only available in master. This requirement will be removed by after the next sdk update.
 - `oauth2client`_ - Required for OAuth2 Strategies
 - `httplib2`_ - Required for OAuth and OAuth2 Strategies
 - `uri-templates`_ - Required for OAuth and OAuth2 Strategies
@@ -239,7 +238,6 @@ License
 
 .. _EngineAuth: http://code.scotchmedia.com/engineauth
 .. _EngineAuth Example: http://engineauth.scotchmedia.com
-.. _ndb: http://code.google.com/p/appengine-ndb-experiment/
 .. _Google Api Python Client: http://code.google.com/p/google-api-python-client/
 .. _oauth2client: http://code.google.com/p/google-api-python-client/
 .. _httplib2: http://code.google.com/p/google-api-python-client/
