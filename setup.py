@@ -17,7 +17,7 @@ from setuptools import setup
 
 setup(
     name = 'EngineAuth',
-    version = '0.1',
+    version = '0.2.0',
     license = 'Apache Software License',
     url = 'http://engineauth.appspot.com',
     description = "Google App Engine: Multi-Provider Authentication Simplified.",
