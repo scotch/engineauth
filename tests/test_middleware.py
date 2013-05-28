@@ -216,27 +216,3 @@ class TestAuthMiddleware(test_base.BaseTestCase):
         self.assertEquals(msgs, None)
         msgs_key = req.get_messages()
         self.assertEquals(msgs_key, None)
-
-    def test_set_redirect_uri(self):
-        # test without next uri
-        req = EngineAuthRequest.blank('/auth/google')
-        req._load_session()
-        req.set_redirect_uri()
-        req._config = {'success_uri': '/callback'}
-        redirect_uri = req.get_redirect_uri()
-        self.assertEqual(redirect_uri, '/callback')
-
-        # test with out next uri
-        req = EngineAuthRequest.blank('/auth/google?next=/newcallback')
-        req._load_session()
-        req.set_redirect_uri()
-        req._config = {'success_uri': '/callback'}
-        redirect_uri = req.get_redirect_uri()
-        self.assertEqual(redirect_uri, '/newcallback')
-
-        req = EngineAuthRequest.blank('/auth/google?next=/newcallback&a=121&123=a')
-        req._load_session()
-        req.set_redirect_uri()
-        req._config = {'success_uri': '/callback'}
-        redirect_uri = req.get_redirect_uri()
-        self.assertEqual(redirect_uri, '/newcallback')

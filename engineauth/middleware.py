@@ -93,12 +93,6 @@ class EngineAuthRequest(Request):
             pass
     get_messages = _get_messages
 
-    def _set_redirect_uri(self):
-        next_uri = self.GET.get('next')
-        if next_uri is not None:
-            self.session.data['_redirect_uri'] = next_uri
-    set_redirect_uri = _set_redirect_uri
-
     def _get_redirect_uri(self):
         try:
             return self.session.data.pop('_redirect_uri').encode('utf-8')
@@ -128,7 +122,6 @@ class AuthMiddleware(object):
         req._config = self._config
         req._load_session()
         req._load_user()
-        req._set_redirect_uri()
         resp = None
         # If the requesting url is for engineauth load the strategy
         if environ['PATH_INFO'].startswith(self._config['base_uri']):
