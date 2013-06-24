@@ -10,7 +10,7 @@ class GithubStrategy(OAuth2Strategy):
     def options(self):
         return {
             'provider': 'github',
-            'site_uri': 'https://api.github.comm',
+            'site_uri': 'https://api.github.com',
             'auth_uri': 'https://github.com/login/oauth/authorize',
             'token_uri': 'https://github.com/login/oauth/access_token',
             }
