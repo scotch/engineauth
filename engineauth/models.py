@@ -132,7 +132,7 @@ class UserEmail(ndb.Model):
     verified = ndb.BooleanProperty(default=False, indexed=True)
 
     @classmethod
-    def create(cls, address, user_id, primary=None, verified=None, type=None):
+    def create(cls, address, user_id, primary=False, verified=False, type=None):
         address = address.lower()
         email = cls.get_by_id(address)
         if email is not None and email.user_id != user_id:
@@ -249,7 +249,7 @@ class User(ndb.Expando):
     def get_emails(self):
         return self.email_model.get_by_user(self.get_id())
 
-    def add_email(self, value, primary=None, verified=None, type=None):
+    def add_email(self, value, primary=False, verified=False, type=None):
         return self.email_model.create(value, self.get_id(), primary=primary,
             verified=verified, type=type)
 
