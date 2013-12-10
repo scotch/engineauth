@@ -48,6 +48,11 @@ default_config = {
         'client_id': None,
         'client_secret': None,
         },
+    'provider.instagram': {
+        'class_path': 'engineauth.strategies.instagram.InstagramStrategy',
+        'client_id': None,
+        'client_secret': None,
+        },
     }
 
 def load_config(cust_config=None):
