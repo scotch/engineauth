@@ -13,7 +13,7 @@ class TwitterStrategy(OAuthStrategy):
             'provider': 'twitter',
             'request_token_uri': 'https://api.twitter.com/oauth/request_token',
             'access_token_uri': 'https://api.twitter.com/oauth/access_token',
-            'authorize_uri': 'https://api.twitter.com/oauth/authorize',
+            'authorize_uri': 'https://api.twitter.com/oauth/authenticate',
             }
 
     def service(self, **kwargs):
