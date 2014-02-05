@@ -84,7 +84,7 @@ def response_decoder(body):
       params[k] = v
     else:
       params[k] = v[0]
-    return params
+  return params
 
 
 class Credentials(object):
