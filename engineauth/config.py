@@ -8,6 +8,7 @@ default_config = {
     'base_uri': '/auth',
     'login_uri': '/login',
     'success_uri': '/',
+    'redirect_back': False,
     'secret_key': 'CHANGE_TO_A_SECRET_KEY', # We add this here for testing only
     'user_model': 'engineauth.models.User',
     'provider.appengine_openid': {
