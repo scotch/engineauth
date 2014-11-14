@@ -27,7 +27,7 @@ class GoogleStrategy(OAuth2Strategy):
         try:
             user = self.service().people().get(userId='me').execute(self.http(req))
             auth_id = User.generate_auth_id('google', user['id'], 'plus')
-            urls = user.get('urls')
+            urls = user.get('urls') or []
             if user.get('url'):
                 urls.append({u'type':u'google#plus', u'value': user.get('url')})
         except Exception:
