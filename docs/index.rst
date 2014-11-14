@@ -149,6 +149,7 @@ Google Plus
 9. Click ``Create client ID``
 10. Copy ``Client ID`` as ``client_id``
 11. Copy ``Client secret`` as ``client_secret``
+12. Enable Google+ API in the console.
 
 Twitter
 *******
