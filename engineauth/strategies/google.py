@@ -5,6 +5,7 @@ from engineauth.models import User
 from engineauth.strategies.oauth2 import OAuth2Strategy
 from google.appengine.api import memcache
 import httplib2
+import traceback
 
 
 class GoogleStrategy(OAuth2Strategy):
@@ -26,10 +27,11 @@ class GoogleStrategy(OAuth2Strategy):
         try:
             user = self.service().people().get(userId='me').execute(self.http(req))
             auth_id = User.generate_auth_id('google', user['id'], 'plus')
-            urls = user.get('urls')
+            urls = user.get('urls') or []
             if user.get('url'):
                 urls.append({u'type':u'google#plus', u'value': user.get('url')})
         except Exception:
+            traceback.print_exc()
             return self.raise_error('There was an error contacting Google Plus. '
                                     'Note this strategy requires a Google Plus Account. '
                                     'If you have a Google Plus Account '

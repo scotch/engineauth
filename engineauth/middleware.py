@@ -3,6 +3,7 @@ from engineauth import models
 from engineauth import utils
 from engineauth.config import load_config
 import re
+import traceback
 from webob import Response
 from webob import Request
 
@@ -157,6 +158,7 @@ class AuthMiddleware(object):
                                 'provider.{0}'.format(provider)]['class_path']
             return utils.import_class(strategy_location)
         except Exception, e:
+            traceback.print_exc()
             raise(Exception, "You must provide a location for the {0} "\
                              "strategy. Add a 'location' key to the "\
                              "'provider.{0}' config dict".format(provider))
