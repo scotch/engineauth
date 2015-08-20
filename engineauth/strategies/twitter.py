@@ -22,7 +22,7 @@ class TwitterStrategy(OAuthStrategy):
     def user_info(self, req):
         url = 'https://api.twitter.com/1.1/account/verify_credentials.json'
         res, results = self.http(req).request(url)
-        if res.status is not 200:
+        if res.status != 200:
             raise('A {0} error.'.format(req.provider))
         user = json.loads(results)
         try:
