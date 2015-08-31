@@ -1,3 +1,4 @@
+import traceback
 import threading
 from webob import Request
 import webob
@@ -33,6 +34,7 @@ class BaseStrategy(object):
         try:
             redirect_uri = self.handle_request(req)
         except Exception, e:
+            traceback.print_exc()
             req.add_message(e.message, level='error')
             redirect_uri = self.config['login_uri']
         resp = webob.exc.HTTPTemporaryRedirect(location=redirect_uri)
