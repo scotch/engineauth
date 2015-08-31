@@ -21,16 +21,27 @@ __author__ = 'kyle.finley@gmail.com (Kyle Finley)'
 class PasswordStrategy(BaseStrategy):
 
     def user_info(self, req):
-        email = req.POST['email']
+        email = req.POST.get('email')
+        uid = req.POST[req.provider_config['uid']].lower()
+
         user_info = req.POST.get('user_info', {})
-        user_info['emails'] = [{'value': email, 'type': 'home', 'primary': True}]
-        auth_id = models.User.generate_auth_id(req.provider, email)
+        if email is not None:
+            user_info['emails'] = [{'value': email, 'type': 'home', 'primary': True}]
+
+        auth_id = models.User.generate_auth_id(req.provider, uid)
+        raw_info = req.POST.mixed()
+        if 'email' in raw_info:
+            del raw_info['email']
+        if 'password' in raw_info:
+            del raw_info['password']
+
         return {
             'auth_id': auth_id,
+            'id': uid,
             'info': user_info,
             'extra': {
-                'raw_info': user_info,
-                }
+                'raw_info': raw_info
+            }
         }
 
     def get_or_create_profile(self, auth_id, user_info, **kwargs):
@@ -58,10 +69,12 @@ class PasswordStrategy(BaseStrategy):
     def handle_request(self, req):
         # confirm that required fields are provided.
         password = req.POST['password']
-        email = req.POST['email']
-        if not password or not email:
-            return self.raise_error('Please provide a valid email '
-                                    'and a password.')
+        uid = req.POST[req.provider_config['uid']].lower()
+
+        for field in req.provider_config['required']:
+            if not req.POST[field]:
+                return self.raise_error('Please provide a valid %s.' % field)
+
         user_info = self.user_info(req)
         profile = self.get_or_create_profile(
             auth_id=user_info['auth_id'],
