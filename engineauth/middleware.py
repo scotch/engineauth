@@ -117,8 +117,11 @@ class AuthMiddleware(object):
     def __init__(self, app, config=None):
         self.app = app
         self._config = load_config(config)
-        self._url_parse_re = re.compile(r'%s/([^\s/]+)/*(\S*)' %
-                                        (self._config['base_uri']))
+        self._base_uri = self._config['base_uri']
+        if not self._base_uri.endswith('/'):
+            self._base_uri = "%s/" % self._base_uri
+        self._url_parse_re = re.compile(r'%s([^\s/]+)/*(\S*)' %
+                                        (self._base_uri))
 
     def __call__(self, environ, start_response):
         # If the request is to the admin, return
@@ -133,7 +136,7 @@ class AuthMiddleware(object):
             req._set_redirect_back()
         resp = None
         # If the requesting url is for engineauth load the strategy
-        if environ['PATH_INFO'].startswith(self._config['base_uri']):
+        if environ['PATH_INFO'].startswith(self._base_uri):
             # extract provider and additional params from the url
             provider, provider_params = self._url_parse_re.match(
                 req.path_info).group(1, 2)
@@ -162,4 +165,3 @@ class AuthMiddleware(object):
             raise(Exception, "You must provide a location for the {0} "\
                              "strategy. Add a 'location' key to the "\
                              "'provider.{0}' config dict".format(provider))
-
