@@ -54,6 +54,11 @@ default_config = {
         'client_id': None,
         'client_secret': None,
         },
+    'provider.sinaweibo': {
+        'class_path': 'engineauth.strategies.sinaweibo.SinaWeiboStrategy',
+        'client_id': None,
+        'client_secret': None,
+        }
     }
 
 def load_config(cust_config=None):
