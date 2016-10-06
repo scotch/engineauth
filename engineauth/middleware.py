@@ -96,7 +96,7 @@ class EngineAuthRequest(Request):
 
     def _set_redirect_back(self):
          next_uri = self.referer
-         if next_uri is not None and self._config['redirect_back']:
+         if next_uri is not None and self._config['redirect_back'] and self.server_name in next_uri:
             self.session.data['_redirect_uri'] = next_uri
     set_redirect_uri = _set_redirect_back
 
@@ -132,11 +132,11 @@ class AuthMiddleware(object):
         req._config = self._config
         req._load_session()
         req._load_user()
-        if req._config['redirect_back']:
-            req._set_redirect_back()
         resp = None
         # If the requesting url is for engineauth load the strategy
         if environ['PATH_INFO'].startswith(self._base_uri):
+            if req._config['redirect_back']:
+                req._set_redirect_back()
             # extract provider and additional params from the url
             provider, provider_params = self._url_parse_re.match(
                 req.path_info).group(1, 2)
