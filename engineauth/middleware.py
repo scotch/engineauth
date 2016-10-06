@@ -95,8 +95,11 @@ class EngineAuthRequest(Request):
     get_messages = _get_messages
 
     def _set_redirect_back(self):
-         next_uri = self.referer
-         if next_uri is not None and self._config['redirect_back'] and self.server_name in next_uri:
+        """ Save a valid url to redirect back after OAuth dance. """
+        next_uri = self.referer
+        # uri is valid if its domain matches the current server name
+        uri_is_valid = re.match(r'(https?://)?' + self.server_name + '.*', next_uri) if next_uri else False
+        if next_uri is not None and self._config['redirect_back'] and uri_is_valid:
             self.session.data['_redirect_uri'] = next_uri
     set_redirect_uri = _set_redirect_back
 
